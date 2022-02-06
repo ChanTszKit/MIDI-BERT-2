@@ -207,22 +207,20 @@ def main():
         print(all_output) #prediction
         
         #visualize
+        out = mid_parser.MidiFile()
+        out.ticks_per_beat = 480
+        out.instruments = [ct.Instrument(program=0,is_drum=False,name='Melody'),ct.Instrument(program=0,is_drum=False,name='Bridge'), ct.Instrument(program=0,is_drum=False,name='Accompaniment')]
         for ttype in range(1,4):
-            out = mid_parser.MidiFile()
-            out.ticks_per_beat = 480
-            out.instruments = [ct.Instrument(program=0,is_drum=False,name='post-processed piano')]
             current_beat=-1
             for idx1,i in enumerate(all_output):
                 for idx2,j in enumerate(i):                    
                     n=X[idx1][idx2]
                     if n[0]==0:
                         current_beat+=1
-                        
                     if all_output[idx1][idx2]==ttype:
-                        out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
+                        out.instruments[ttype-1].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
                     
-            out.dump('test'+str(ttype)+'.mid')
-            print(current_beat)
+        out.dump('test_combined.mid')
             
         #reconstruct the original score
         out = mid_parser.MidiFile()
