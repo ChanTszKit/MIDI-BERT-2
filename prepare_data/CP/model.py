@@ -49,7 +49,7 @@ class CP(object):
 
         return data
 
-    def prepare_data(self, midi_paths, task, max_len):
+    def prepare_data(self, midi_paths, task, max_len):#path,None,512
         all_words, all_ys = [], []
 
         for path in tqdm(midi_paths):
