@@ -204,10 +204,10 @@ def main():
     
     test_loss, test_acc, all_output = trainer.test()
     if args.task =='custom':
-        # print(all_output) #prediction
+        print(all_output) #prediction
         
         #visualize
-        for ttype in range(4):
+        for ttype in range(1,4):
             out = mid_parser.MidiFile()
             out.ticks_per_beat = 480
             out.instruments = [ct.Instrument(program=0,is_drum=False,name='post-processed piano')]
