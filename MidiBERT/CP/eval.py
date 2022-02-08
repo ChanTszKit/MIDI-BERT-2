@@ -118,7 +118,9 @@ def conf_mat(_y, output, task):
     output = output.reshape(-1,1)
     _y = _y.reshape(-1,1)
     
+    
     cm = confusion_matrix(_y, output) 
+    print(cm)
     
     _title = 'BERT (CP): ' + task + ' task'
     
@@ -156,18 +158,15 @@ def main():
         
     if args.task == 'custom':
         X = load_data(dataset,args.task).astype(np.int64)
-        y=np.zeros((X.shape[0],X.shape[1])).astype(np.int64)
-        print('@',X.dtype,y.dtype)
+        y=np.zeros((X.shape[0],X.shape[1])).astype(np.int64) #just place holder, meaningless, bez we r focusing on prediction
         predictset = FinetuneDataset(X=X,y=y)
         predict_loader = DataLoader(predictset, batch_size=args.batch_size, num_workers=args.num_workers)
         print("   len of test_loader",len(predict_loader))
     else:
         X_train, X_val, X_test, y_train, y_val, y_test = load_data(dataset, args.task)
-        print('@',X_test.dtype,y_test.dtype)
         trainset = FinetuneDataset(X=X_train, y=y_train)
         validset = FinetuneDataset(X=X_val, y=y_val) 
         testset = FinetuneDataset(X=X_test, y=y_test) 
-
         train_loader = DataLoader(trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
         print("   len of train_loader",len(train_loader))
         valid_loader = DataLoader(validset, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -181,13 +180,6 @@ def main():
     checkpoint = torch.load(best_mdl, map_location='cpu')
     model.load_state_dict(checkpoint['state_dict'])
 
-    # remove module
-    #from collections import OrderedDict
-    #new_state_dict = OrderedDict()
-    #for k, v in checkpoint['state_dict'].items():
-    #    name = k[7:]
-    #    new_state_dict[name] = v
-    #model.load_state_dict(new_state_dict)
 
     index_layer = int(args.index_layer)-13
     print("\nCreating Finetune Trainer using index layer", index_layer)
@@ -207,7 +199,7 @@ def main():
         # print(all_output) #prediction
         
         #visualize
-        for ttype in range(4):
+        for ttype in [1,3]:
             out = mid_parser.MidiFile()
             out.ticks_per_beat = 480
             out.instruments = [ct.Instrument(program=0,is_drum=False,name='post-processed piano')]
@@ -218,8 +210,12 @@ def main():
                     if n[0]==0:
                         current_beat+=1
                         
-                    if all_output[idx1][idx2]==ttype:
-                        out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
+                    if ttype==3:
+                        if all_output[idx1][idx2]==3:
+                            out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
+                    else:
+                        if all_output[idx1][idx2]!=3:
+                            out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
                     
             out.dump('test'+str(ttype)+'.mid')
             print(current_beat)
