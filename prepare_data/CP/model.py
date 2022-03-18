@@ -22,6 +22,14 @@ Emotion = {
     "Q4": 3,
 }
 
+def find_intersect(start,end,intervals):
+    def is_overlapping(x1,x2,y1,y2):
+        return max(x1,y1) < min(x2,y2)
+    for inte in intervals:
+        if is_overlapping(start,end,inte[0],inte[1]):
+            return True
+    return False
+
 class CP(object):
     def __init__(self, dict):
         # load dictionary
@@ -30,14 +38,18 @@ class CP(object):
         self.pad_word = [self.event2word[etype]['%s <PAD>' % etype] for etype in self.event2word]
 
     def extract_events(self, input_path, task):
-        note_items, tempo_items = utils.read_items(input_path)
+        if task == "reduction":
+            note_items, tempo_items, pianohist = utils.read_items(input_path,is_reduction=True)
+        else:
+            note_items, tempo_items = utils.read_items(input_path)
+            pianohist = None
         note_items = utils.quantize_items(note_items)
         max_time = note_items[-1].end
         items = tempo_items + note_items
         
         groups = utils.group_items(items, max_time)
         events = utils.item2event(groups, task)
-        return events
+        return events, pianohist
 
     def padding(self, data, max_len, ans):
         pad_len = max_len - len(data)
@@ -52,28 +64,44 @@ class CP(object):
     def prepare_data(self, midi_paths, task, max_len):#path,None,512
         all_words, all_ys = [], []
 
-        for path in tqdm(midi_paths):
+        for path in midi_paths:
             # extract events
-            events = self.extract_events(path, task)
-
+            print(path)
+            events, histp  = self.extract_events(path, task)
+            if task == 'reduction' and histp is None:
+                print("skipped")
+                continue
+            # print(histp)
             # events to words
             words, ys = [], []
             for note_tuple in events:
                 nts, to_class = [], -1
+                pitch, interval = None, None
                 for e in note_tuple:
+                    if e.name == 'genLabel':
+                        interval = e.value
+                        continue
                     e_text = '{} {}'.format(e.name, e.value)
                     nts.append(self.event2word[e.name][e_text])
                     if e.name == 'Pitch':
                         to_class = e.Type
+                        pitch = e.value
                 words.append(nts)
                 if task == 'melody' or task == 'velocity':
                     ys.append(to_class+1)
                 
                 if task=='reduction':
-                    #TODO: add label to ys
-                    ys.append(-1)#ｃｈａｎｇｅ　ｔｈｉｓ　
-                    pass
-
+                    # print(interval[0],interval[1],pitch)
+                    if find_intersect(interval[0],interval[1],histp[pitch]):
+                        ys.append(1)
+                    else:
+                        ys.append(2)
+            ys = np.array(ys)
+            kept_percentage = np.count_nonzero(ys == 1) / len(ys)
+            print(kept_percentage)
+            if kept_percentage < 0.4 or kept_percentage > 0.9:
+                print("skipped")
+                continue
             # slice to chunks so that max length = max_len (default: 512)
             slice_words, slice_ys = [], []
             for i in range(0, len(words), max_len):
