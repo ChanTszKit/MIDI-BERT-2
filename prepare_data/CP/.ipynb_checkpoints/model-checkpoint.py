@@ -49,7 +49,7 @@ class CP(object):
 
         return data
 
-    def prepare_data(self, midi_paths, task, max_len):
+    def prepare_data(self, midi_paths, task, max_len):#path,None,512
         all_words, all_ys = [], []
 
         for path in tqdm(midi_paths):
@@ -68,6 +68,11 @@ class CP(object):
                 words.append(nts)
                 if task == 'melody' or task == 'velocity':
                     ys.append(to_class+1)
+                
+                if task=='reduction':
+                    #TODO: add label to ys
+                    ys.append(-1)#ｃｈａｎｇｅ　ｔｈｉｓ　
+                    pass
 
             # slice to chunks so that max length = max_len (default: 512)
             slice_words, slice_ys = [], []
@@ -91,7 +96,7 @@ class CP(object):
                 else:
                     slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
 
-            if (task == 'melody' or task == 'velocity') and len(slice_ys[-1]) < max_len:
+            if (task == 'melody' or task == 'velocity' or task =='reduction') and len(slice_ys[-1]) < max_len:
                 slice_ys[-1] = self.padding(slice_ys[-1], max_len, ans=True)
             
             all_words = all_words + slice_words

@@ -43,7 +43,7 @@ special_tok(cnt, cls)
 
 # Note On
 cnt, cls = 0, 'Pitch'
-for i in range(22, 108):
+for i in range(0, 128):
     event2word[cls][f'Pitch {i}'] = cnt
     word2event[cls][cnt] = f'Pitch {i}'
     cnt += 1
@@ -63,6 +63,6 @@ print(event2word)
 print(word2event)
 t = (event2word, word2event)
 
-with open('CP_la.pkl', 'wb') as f:
+with open('CP.pkl', 'wb') as f:
     pickle.dump(t, f)
 

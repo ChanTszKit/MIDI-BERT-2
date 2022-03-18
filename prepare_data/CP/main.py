@@ -5,6 +5,7 @@ import pathlib
 import argparse
 import numpy as np
 from model import *
+from sklearn.model_selection import train_test_split
 
 def get_args():
     parser = argparse.ArgumentParser(description='')
@@ -56,7 +57,9 @@ def extract(files, args, model, mode=''):
 
     dataset = args.dataset if args.dataset != 'pianist8' else 'composer'
 
-    if args.input_dir != '':
+    if args.task == 'reduction':
+        output_file = os.path.join(args.output_dir, f'custom_reduction_{mode}.npy')
+    elif args.input_dir != '':
         if args.name == '':
             args.name = os.path.basename(os.path.normpath(args.input_dir))
         output_file = os.path.join(args.output_dir, f'{args.name}.npy')
@@ -64,6 +67,7 @@ def extract(files, args, model, mode=''):
         output_file = os.path.join(args.output_dir, f'{dataset}_{mode}.npy')
     elif dataset == 'pop1k7' or dataset == 'ASAP':
         output_file = os.path.join(args.output_dir, f'{dataset}.npy')
+    
 
     np.save(output_file, segments)
     print(f'Data shape: {segments.shape}, saved at {output_file}')
@@ -73,6 +77,9 @@ def extract(files, args, model, mode=''):
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_{args.task[:3]}ans.npy')
         elif args.task == 'composer' or args.task == 'emotion':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_ans.npy')
+        elif args.task == 'reduction':
+            ans_file = os.path.join(args.output_dir, f'custom_reduction_{mode}_ans.npy')
+            
         np.save(ans_file, ans)
         print(f'Answer shape: {ans.shape}, saved at {ans_file}')
 
@@ -121,8 +128,18 @@ def main():
         extract(valid_files, args, model, 'valid')
         extract(test_files, args, model, 'test')
     else:
-        # in one single file
-        extract(files, args, model)
+        if args.task=='reduction':
+            files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(args.input_dir) for f in filenames if os.path.splitext(f)[1] == '.mid']
+            X_train, X_test  = train_test_split(files, test_size=0.3, random_state=1)
+            X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=1)
+            
+            extract(X_train, args, model, 'train')
+            extract(X_val, args, model, 'valid')
+            extract(X_test, args, model, 'test')
+        else:
+            # in one single file
+            extract(files, args, model)
+        
 
 if __name__ == '__main__':
     main()
