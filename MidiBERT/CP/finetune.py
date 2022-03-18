@@ -14,15 +14,19 @@ from finetune_dataset import FinetuneDataset
 
 from matplotlib import pyplot as plt
 
+import os
+this_dir = os.path.dirname(os.path.realpath(__file__))+'/'
+
 def get_args():
+
     parser = argparse.ArgumentParser(description='')
 
     ### mode ###
-    parser.add_argument('--task', choices=['melody', 'velocity', 'composer', 'emotion'], required=True)
+    parser.add_argument('--task', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction'], required=True)
     ### path setup ###
-    parser.add_argument('--dict_file', type=str, default='../../dict/CP.pkl')
+    parser.add_argument('--dict_file', type=str, default=this_dir+'../../dict/CP.pkl')
     parser.add_argument('--name', type=str, default='')
-    parser.add_argument('--ckpt', default='result/pretrain/test/model_best.ckpt')
+    parser.add_argument('--ckpt', default=this_dir+'result/finetune/pretrain_model.ckpt')
 
     ### parameter setting ###
     parser.add_argument('--num_workers', type=int, default=5)
@@ -49,17 +53,19 @@ def get_args():
         args.class_num = 8
     elif args.task == 'emotion':
         args.class_num = 4
+    elif args.task == 'reduction':
+        args.class_num = 3 #(0 = padding, 1 = keep, 2 = discard)
 
     return args
 
 
 def load_data(dataset, task):
-    data_root = '../../data/CP/'
+    data_root = this_dir+'../../data/CP/'
 
     if dataset == 'emotion':
         dataset = 'emopia'
 
-    if dataset not in ['pop909', 'composer', 'emopia']:
+    if dataset not in ['pop909', 'composer', 'emopia','custom_reduction']:
         print(f'Dataset {dataset} not supported')
         exit(1)
         
@@ -109,7 +115,12 @@ def main():
     elif args.task == 'emotion':
         dataset = 'emopia'
         seq_class = True
+    elif args.task == 'reduction':
+        dataset = 'custom_reduction'
+        seq_class = False
+        
     X_train, X_val, X_test, y_train, y_val, y_test = load_data(dataset, args.task)
+    #TODO
     
     trainset = FinetuneDataset(X=X_train, y=y_train)
     validset = FinetuneDataset(X=X_val, y=y_val) 
@@ -143,7 +154,7 @@ def main():
     
     
     print("\nTraining Start")
-    save_dir = os.path.join('result/finetune/', args.task + '_' + args.name)
+    save_dir = os.path.join(this_dir+'result/finetune/', args.task + '_' + args.name)
     os.makedirs(save_dir, exist_ok=True)
     filename = os.path.join(save_dir, 'model.ckpt')
     print("   save model at {}".format(filename))
@@ -151,7 +162,7 @@ def main():
     best_acc, best_epoch = 0, 0
     bad_cnt = 0
 
-#    train_accs, valid_accs = [], []
+    train_accs, valid_accs = [], []
     with open(os.path.join(save_dir, 'log'), 'a') as outfile:
         outfile.write("Loading pre-trained model from " + best_mdl.split('/')[-1] + '\n')
         for epoch in range(args.epochs):
@@ -170,8 +181,8 @@ def main():
             print('epoch: {}/{} | Train Loss: {} | Train acc: {} | Valid Loss: {} | Valid acc: {} | Test loss: {} | Test acc: {}'.format(
                 epoch+1, args.epochs, train_loss, train_acc, valid_loss, valid_acc, test_loss, test_acc))
 
-#            train_accs.append(train_acc)
-#            valid_accs.append(valid_acc)
+            train_accs.append(train_acc)
+            valid_accs.append(valid_acc)
             trainer.save_checkpoint(epoch, train_acc, valid_acc, 
                                     valid_loss, train_loss, is_best, filename)
 
@@ -179,19 +190,19 @@ def main():
             outfile.write('Epoch {}: train_loss={}, valid_loss={}, test_loss={}, train_acc={}, valid_acc={}, test_acc={}\n'.format(
                 epoch+1, train_loss, valid_loss, test_loss, train_acc, valid_acc, test_acc))
         
-            if bad_cnt > 3:
-                print('valid acc not improving for 3 epochs')
+            if bad_cnt > 10:
+                print('valid acc not improving for 10 epochs')
                 break
 
     # draw figure valid_acc & train_acc
-    '''plt.figure()
+    plt.figure()
     plt.plot(train_accs)
     plt.plot(valid_accs)
-    plt.title(f'{args.task} task accuracy (w/o pre-training)')
+    plt.title(f'{args.task} task accuracy (w/ pre-training)')
     plt.xlabel('epoch')
     plt.ylabel('accuracy')
     plt.legend(['train','valid'], loc='upper left')
-    plt.savefig(f'acc_{args.task}_scratch.jpg')'''
+    plt.savefig(f'{this_dir}acc_{args.task}_scratch.jpg')
 
 if __name__ == '__main__':
     main()

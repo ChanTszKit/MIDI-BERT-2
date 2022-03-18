@@ -1,0 +1,8 @@
+Loading pre-trained model from pretrain_model.ckpt
+Loading pre-trained model from pretrain_model.ckpt
+Loading pre-trained model from pretrain_model.ckpt
+Loading pre-trained model from pretrain_model.ckpt
+Epoch 1: train_loss=1.0252, valid_loss=0.8552, test_loss=0.8624, train_acc=0.4854, valid_acc=0.4854, test_acc=0.4912
+Loading pre-trained model from pretrain_model.ckpt
+Epoch 1: train_loss=1.0109, valid_loss=0.8598, test_loss=0.8585, train_acc=0.4854, valid_acc=0.4815, test_acc=0.5049
+Epoch 2: train_loss=0.8336, valid_loss=0.7736, test_loss=0.7759, train_acc=0.5396, valid_acc=0.5049, test_acc=0.499

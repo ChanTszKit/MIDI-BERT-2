@@ -27,7 +27,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='')
 
     ### mode ###
-    parser.add_argument('--task', choices=['melody', 'velocity','composer', 'emotion', 'custom'], required=True)
+    parser.add_argument('--task', choices=['melody', 'velocity','composer', 'emotion', 'custom', 'reduction'], required=True)
     
     ### path setup ###
     parser.add_argument('--dict_file', type=str, default='../../dict/CP.pkl')
@@ -53,6 +53,9 @@ def get_args():
     if args.task == 'melody' or args.task=='custom':
         args.class_num = 4
         args.ckpt = root + 'melody_default/model_best.ckpt' if args.ckpt=='' else args.ckpt
+    elif args.task=='reduction':
+        args.class_num = 3
+        args.ckpt = root + 'reduction_/model_best.ckpt' if args.ckpt=='' else args.ckpt
     elif args.task == 'velocity':
         args.class_num = 7
         args.ckpt = root + 'velocity_default/model_best.ckpt' if args.ckpt=='' else args.ckpt

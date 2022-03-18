@@ -9,7 +9,7 @@ from model import *
 def get_args():
     parser = argparse.ArgumentParser(description='')
     ### mode ###
-    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion'])
+    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction'])
 
     ### path ###
     parser.add_argument('--dict', type=str, default='../../dict/CP.pkl')
