@@ -114,7 +114,7 @@ def main():
     elif args.dataset == 'ASAP':
         files = pickle.load(open('../../Dataset/ASAP_song.pkl', 'rb'))
         files = [f'../../Dataset/asap-dataset/{file}' for file in files]
-
+    
     elif args.input_dir:
         files = glob.glob(f'{args.input_dir}/*.mid')
 
@@ -130,6 +130,8 @@ def main():
     else:
         if args.task=='reduction':
             files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(args.input_dir) for f in filenames if os.path.splitext(f)[1] == '.mid']
+            print(files)
+            exit(1)
             X_train, X_test  = train_test_split(files, test_size=0.3, random_state=1)
             X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=1)
             
