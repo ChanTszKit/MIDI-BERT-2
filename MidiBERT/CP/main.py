@@ -53,6 +53,9 @@ def load_data(datasets):
             
         elif dataset == 'pop1k7' or dataset == 'ASAP':
             data = np.load(os.path.join(root, f'{dataset}.npy'), allow_pickle=True)
+        
+        elif dataset == "gpo":
+            data = np.load(os.path.join(root,"giantpianoandorch.npy"),allow_pickle=True)
 
         print(f'   {dataset}: {data.shape}')
         to_concat.append(data)
