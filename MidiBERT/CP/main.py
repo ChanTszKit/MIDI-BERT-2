@@ -38,7 +38,7 @@ def get_args():
     
     ### cuda ###
     parser.add_argument("--cpu", action="store_true")   # default: False
-    parser.add_argument("--cuda_devices", type=int, nargs='+', default=[0,1,2,3], help="CUDA device ids")
+    parser.add_argument("--cuda_devices", type=int, nargs='+', default=[0,1], help="CUDA device ids")
 
     args = parser.parse_args()
 
