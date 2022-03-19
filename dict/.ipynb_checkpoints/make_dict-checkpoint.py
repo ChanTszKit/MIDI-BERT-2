@@ -43,7 +43,7 @@ special_tok(cnt, cls)
 
 # Note On
 cnt, cls = 0, 'Pitch'
-for i in range(0, 128):
+for i in range(22, 108):
     event2word[cls][f'Pitch {i}'] = cnt
     word2event[cls][cnt] = f'Pitch {i}'
     cnt += 1
