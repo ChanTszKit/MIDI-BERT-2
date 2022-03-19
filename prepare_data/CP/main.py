@@ -130,8 +130,8 @@ def main():
     else:
         if args.task=='reduction':
             files = [str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir) for d in dir]
-            X_train, X_test  = train_test_split(files, test_size=0.3, random_state=1)
-            X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=1)
+            X_train, X_test  = train_test_split(files, test_size=0.2, random_state=42)
+            X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=42)
             
             extract(X_train, args, model, 'train')
             extract(X_val, args, model, 'valid')
