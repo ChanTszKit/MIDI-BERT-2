@@ -74,6 +74,7 @@ class CP(object):
             # print(histp)
             # events to words
             words, ys = [], []
+            i = 0
             for note_tuple in events:
                 nts, to_class = [], -1
                 pitch, interval = None, None
@@ -91,7 +92,6 @@ class CP(object):
                     ys.append(to_class+1)
                 
                 if task=='reduction':
-                    # print(interval[0],interval[1],pitch)
                     if pitch not in histp:
                         ys.append(2)
                     elif find_intersect(interval[0],interval[1],histp[pitch]):

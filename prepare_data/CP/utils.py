@@ -148,9 +148,9 @@ def read_items(file_path,is_reduction=False):
 
     if is_reduction:
         notep,tpbp = read_midi(os.path.join(file_path,"piano.mid"))
-        if tpbp != tpbo:
-            print("GG tpb different")
-            return note_items,tempo_items,None
+        # if tpbp != tpbo:
+        #     print("GG tpb different")
+        #     return note_items,tempo_items,None
         histp = interval_histogram(notep)
         return note_items,tempo_items,histp
 
