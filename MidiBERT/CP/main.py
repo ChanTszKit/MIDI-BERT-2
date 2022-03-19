@@ -29,7 +29,7 @@ def get_args():
     
     ### parameter setting ###
     parser.add_argument('--num_workers', type=int, default=5)
-    parser.add_argument('--batch_size', type=int, default=12)
+    parser.add_argument('--batch_size', type=int, default=6)
     parser.add_argument('--mask_percent', type=float, default=0.15, help="Up to `valid_seq_len * target_max_percent` tokens will be masked out for prediction")
     parser.add_argument('--max_seq_len', type=int, default=512, help='all sequences are padded to `max_seq_len`')
     parser.add_argument('--hs', type=int, default=768)      # hidden state
@@ -67,7 +67,7 @@ def load_data(datasets):
 
 
     training_data = np.vstack(to_concat)
-    logger.info('   > all training data:', training_data.shape)
+    logger.info('   > all training data: {}'.format(training_data.shape))
     
     # shuffle during training phase
     index = np.arange(len(training_data))
