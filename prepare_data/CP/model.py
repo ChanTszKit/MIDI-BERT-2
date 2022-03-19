@@ -86,6 +86,8 @@ class CP(object):
                     if e.name == 'Pitch':
                         to_class = e.Type
                         pitch = e.value
+                if pitch <22 or pitch > 107:
+                    continue
                 words.append(nts)
                 if task == 'melody' or task == 'velocity':
                     ys.append(to_class+1)
