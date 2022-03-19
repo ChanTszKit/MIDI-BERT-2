@@ -100,6 +100,8 @@ def read_items(file_path,is_reduction=False):
         notes.sort(key=lambda x: (x.start, x.pitch))
 
         for note in notes:
+            if note.pitch < 22 or note.pitch > 107:
+                continue
             note_items.append(Item(
                 name='Note',
                 start=int(note.start/tpbo*DEFAULT_RESOLUTION), 
