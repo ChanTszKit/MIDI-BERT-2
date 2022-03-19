@@ -108,13 +108,13 @@ class CP(object):
                     slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
                 return np.array(slice_words),None
 
-                        
-            ysn = np.array(ys)
-            kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
-            print(kept_percentage)
-            if kept_percentage < 0.4 or kept_percentage > 0.9:
-                print("skipped")
-                continue
+            if task == "reduction":            
+                ysn = np.array(ys)
+                kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
+                print(kept_percentage)
+                if kept_percentage < 0.4 or kept_percentage > 0.9:
+                    print("skipped")
+                    continue
             # slice to chunks so that max length = max_len (default: 512)
             slice_words, slice_ys = [], []
             for i in range(0, len(words), max_len):
