@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 def get_args():
     parser = argparse.ArgumentParser(description='')
     ### mode ###
-    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction'])
+    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction','custom'])
 
     ### path ###
     parser.add_argument('--dict', type=str, default='../../dict/CP.pkl')
@@ -59,6 +59,8 @@ def extract(files, args, model, mode=''):
 
     if args.task == 'reduction':
         output_file = os.path.join(args.output_dir, f'custom_reduction_{mode}.npy')
+    elif args.task =='custom':
+        output_file = os.path.join(args.output_dir, f'{args.name}.npy')
     elif args.input_dir != '':
         if args.name == '':
             args.name = os.path.basename(os.path.normpath(args.input_dir))
@@ -72,13 +74,14 @@ def extract(files, args, model, mode=''):
     np.save(output_file, segments)
     print(f'Data shape: {segments.shape}, saved at {output_file}')
 
-    if args.task != '':
+    if args.task != '' and args.task!='custom':
         if args.task == 'melody' or args.task == 'velocity':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_{args.task[:3]}ans.npy')
         elif args.task == 'composer' or args.task == 'emotion':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_ans.npy')
         elif args.task == 'reduction':
             ans_file = os.path.join(args.output_dir, f'custom_reduction_{mode}_ans.npy')
+            
             
         np.save(ans_file, ans)
         print(f'Answer shape: {ans.shape}, saved at {ans_file}')

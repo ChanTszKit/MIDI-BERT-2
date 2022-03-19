@@ -86,8 +86,6 @@ class CP(object):
                     if e.name == 'Pitch':
                         to_class = e.Type
                         pitch = e.value
-                if pitch <22 or pitch > 107:
-                    continue
                 words.append(nts)
                 if task == 'melody' or task == 'velocity':
                     ys.append(to_class+1)
@@ -100,6 +98,17 @@ class CP(object):
                         ys.append(1)
                     else:
                         ys.append(2)
+                        
+                        
+            if task=='custom':
+                slice_words=[]
+                for i in range(0, len(words), max_len):
+                    slice_words.append(words[i:i+max_len])
+                if len(slice_words[-1]) < max_len:
+                    slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
+                return np.array(slice_words),None
+
+                        
             ysn = np.array(ys)
             kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
             print(kept_percentage)

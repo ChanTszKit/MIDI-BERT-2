@@ -32,6 +32,7 @@ def get_args():
     ### path setup ###
     parser.add_argument('--dict_file', type=str, default='../../dict/CP.pkl')
     parser.add_argument('--ckpt', type=str, default='')
+    parser.add_argument('--case', type=str, default='')
 
     ### parameter setting ###
     parser.add_argument('--num_workers', type=int, default=5)
@@ -65,17 +66,23 @@ def get_args():
     elif args.task == 'emotion':
         args.class_num = 4
         args.ckpt = root + 'emotion_default/model_best.ckpt' if args.ckpt=='' else args.ckpt
+    elif args.task == 'reduction':
+        args.class_num = 3
+        args.ckpt = root + 'reduction_/model_best.ckpt' if args.ckpt=='' else args.ckpt
 
     return args
 
 
-def load_data(dataset, task):
+def load_data(dataset, task, case=None):
     data_root = '../../data/CP/'
 
     if dataset == 'emotion':
         dataset = 'emopia'
 
-    if dataset =='custom':
+    if dataset =='casestudy':
+        X = np.load(os.path.join(data_root, f'{case}.npy'), allow_pickle=True)
+        return X
+    elif dataset =='custom':
         X = np.load(os.path.join(data_root, f'{dataset}.npy'), allow_pickle=True)
         return X
     else:
@@ -158,13 +165,17 @@ def main():
         dataset = args.task
         model = SequenceClassification(midibert, args.class_num, args.hs)
         seq_class = True
+    elif args.task=='reduction':
+        dataset='casestudy'
+        model = TokenClassification(midibert, args.class_num, args.hs)
+        seq_class = False
         
-    if args.task == 'custom':
-        X = load_data(dataset,args.task).astype(np.int64)
+    if args.task == 'custom' or args.task=='reduction':
+        X = load_data(dataset,args.task,args.case).astype(np.int64)
         y=np.zeros((X.shape[0],X.shape[1])).astype(np.int64) #just place holder, meaningless, bez we r focusing on prediction
         predictset = FinetuneDataset(X=X,y=y)
         predict_loader = DataLoader(predictset, batch_size=args.batch_size, num_workers=args.num_workers)
-        print("   len of test_loader",len(predict_loader))
+        print("   len of predict_loader",len(predict_loader))
     else:
         X_train, X_val, X_test, y_train, y_val, y_test = load_data(dataset, args.task)
         trainset = FinetuneDataset(X=X_train, y=y_train)
@@ -186,7 +197,7 @@ def main():
 
     index_layer = int(args.index_layer)-13
     print("\nCreating Finetune Trainer using index layer", index_layer)
-    if args.task=='custom':        
+    if args.task=='custom' or args.task=='reduction':        
         a=(X.shape[0],X.shape[1])
         print('!',X.shape,a)
         trainer = FinetuneTrainer(midibert, None,None, predict_loader, index_layer, args.lr, args.class_num,
@@ -239,7 +250,36 @@ def main():
         out.dump('org.mid')
         print(current_beat)
             
-                
+    elif args.task=='reduction':
+        out = mid_parser.MidiFile()
+        out.ticks_per_beat = 480
+        out.instruments = [ct.Instrument(program=0,is_drum=False,name='reduction')]
+        current_beat=-1
+        for idx1,i in enumerate(all_output):
+            for idx2,j in enumerate(i):                    
+                n=X[idx1][idx2]
+                if n[0]==0:
+                    current_beat+=1
+
+           
+                if all_output[idx1][idx2]==1:
+                    out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
+        out.dump('reduction.mid')
+        
+        out = mid_parser.MidiFile()
+        out.ticks_per_beat = 480
+        out.instruments = [ct.Instrument(program=0,is_drum=False,name='reduction')]
+        current_beat=-1
+        for idx1,i in enumerate(all_output):
+            for idx2,j in enumerate(i):                    
+                n=X[idx1][idx2]
+                if n[0]==0:
+                    current_beat+=1
+
+
+                if all_output[idx1][idx2]!=0:
+                    out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
+        out.dump('original.mid')
     else:
         print('test loss: {}, test_acc: {}'.format(test_loss, test_acc))
         conf_mat(y_test, all_output, args.task)

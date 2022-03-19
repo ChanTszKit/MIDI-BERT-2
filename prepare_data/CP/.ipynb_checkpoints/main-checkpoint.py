@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 def get_args():
     parser = argparse.ArgumentParser(description='')
     ### mode ###
-    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction'])
+    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction','custom'])
 
     ### path ###
     parser.add_argument('--dict', type=str, default='../../dict/CP.pkl')
@@ -59,6 +59,8 @@ def extract(files, args, model, mode=''):
 
     if args.task == 'reduction':
         output_file = os.path.join(args.output_dir, f'custom_reduction_{mode}.npy')
+    elif args.task =='custom':
+        output_file = os.path.join(args.output_dir, f'{args.name}.npy')
     elif args.input_dir != '':
         if args.name == '':
             args.name = os.path.basename(os.path.normpath(args.input_dir))
@@ -72,13 +74,14 @@ def extract(files, args, model, mode=''):
     np.save(output_file, segments)
     print(f'Data shape: {segments.shape}, saved at {output_file}')
 
-    if args.task != '':
+    if args.task != '' and args.task!='custom':
         if args.task == 'melody' or args.task == 'velocity':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_{args.task[:3]}ans.npy')
         elif args.task == 'composer' or args.task == 'emotion':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_ans.npy')
         elif args.task == 'reduction':
             ans_file = os.path.join(args.output_dir, f'custom_reduction_{mode}_ans.npy')
+            
             
         np.save(ans_file, ans)
         print(f'Answer shape: {ans.shape}, saved at {ans_file}')
@@ -114,7 +117,7 @@ def main():
     elif args.dataset == 'ASAP':
         files = pickle.load(open('../../Dataset/ASAP_song.pkl', 'rb'))
         files = [f'../../Dataset/asap-dataset/{file}' for file in files]
-
+    
     elif args.input_dir:
         files = glob.glob(f'{args.input_dir}/*.mid')
 
@@ -129,9 +132,9 @@ def main():
         extract(test_files, args, model, 'test')
     else:
         if args.task=='reduction':
-            files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(args.input_dir) for f in filenames if os.path.splitext(f)[1] == '.mid']
-            X_train, X_test  = train_test_split(files, test_size=0.3, random_state=1)
-            X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=1)
+            files = [str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir) for d in dir]
+            X_train, X_test  = train_test_split(files, test_size=0.2, random_state=42)
+            X_test, X_val  = train_test_split(X_test, test_size=0.5, random_state=42)
             
             extract(X_train, args, model, 'train')
             extract(X_val, args, model, 'valid')
