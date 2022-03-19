@@ -2,6 +2,12 @@ import numpy as np
 import pickle
 import utils
 from tqdm import tqdm
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 Composer = {
     "Bethel": 0,
@@ -66,7 +72,7 @@ class CP(object):
 
         for path in midi_paths:
             # extract events
-            print(path)
+            logger.info(path)
             events, histp  = self.extract_events(path, task)
             if task == 'reduction' and histp is None:
                 print("skipped_nop")
