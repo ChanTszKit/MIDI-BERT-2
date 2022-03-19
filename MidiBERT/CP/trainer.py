@@ -63,7 +63,7 @@ class BERTTrainer:
         return valid_loss, valid_acc
 
     def iteration(self, training_data, max_seq_len, train=True):
-        pbar = tqdm.tqdm(training_data, disable=False)
+        pbar = tqdm.tqdm(training_data, disable=True)
 
         total_acc, total_losses = [0]*len(self.midibert.e2w), 0
         

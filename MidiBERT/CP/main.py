@@ -10,7 +10,12 @@ from transformers import BertConfig
 from model import MidiBert
 from trainer import BERTTrainer
 from midi_dataset import MidiDataset
+import logging
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 def get_args():
     parser = argparse.ArgumentParser(description='')
@@ -57,12 +62,12 @@ def load_data(datasets):
         elif dataset == "gpo":
             data = np.load(os.path.join(root,"giantpianoandorch.npy"),allow_pickle=True)
 
-        print(f'   {dataset}: {data.shape}')
+        logger.info(f'   {dataset}: {data.shape}')
         to_concat.append(data)
 
 
     training_data = np.vstack(to_concat)
-    print('   > all training data:', training_data.shape)
+    logger.info('   > all training data:', training_data.shape)
     
     # shuffle during training phase
     index = np.arange(len(training_data))
@@ -77,42 +82,42 @@ def load_data(datasets):
 def main():
     args = get_args()
 
-    print("Loading Dictionary")
+    logger.info("Loading Dictionary")
     with open(args.dict_file, 'rb') as f:
         e2w, w2e = pickle.load(f)
 
-    print("\nLoading Dataset", args.datasets) 
+    logger.info("\nLoading Dataset {}".format(args.datasets)) 
     X_train, X_val = load_data(args.datasets)
     
     trainset = MidiDataset(X=X_train)
     validset = MidiDataset(X=X_val) 
 
     train_loader = DataLoader(trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
-    print("   len of train_loader",len(train_loader))
+    logger.info("   len of train_loader {}".format(len(train_loader)))
     valid_loader = DataLoader(validset, batch_size=args.batch_size, num_workers=args.num_workers)
-    print("   len of valid_loader",len(valid_loader))
+    logger.info("   len of valid_loader {}".format(len(valid_loader)))
 
-    print("\nBuilding BERT model")
+    logger.info("\nBuilding BERT model")
     configuration = BertConfig(max_position_embeddings=args.max_seq_len,
                                 position_embedding_type='relative_key_query',
                                 hidden_size=args.hs)
     midibert = MidiBert(bertConfig=configuration, e2w=e2w, w2e=w2e)
 
-    print("\nCreating BERT Trainer")
+    logger.info("\nCreating BERT Trainer")
     trainer = BERTTrainer(midibert, train_loader, valid_loader, args.lr, args.batch_size, args.max_seq_len, args.mask_percent, args.cpu, args.cuda_devices)
     
-    print("\nTraining Start")
+    logger.info("\nTraining Start")
     save_dir = 'result/pretrain/' + args.name
     os.makedirs(save_dir, exist_ok=True)
     filename = os.path.join(save_dir, 'model.ckpt')
-    print("   save model at {}".format(filename))
+    logger.info("   save model at {}".format(filename))
 
     best_acc, best_epoch = 0, 0
     bad_cnt = 0
 
     for epoch in range(args.epochs):
         if bad_cnt >= 30:
-            print('valid acc not improving for 30 epochs')
+            logger.info('valid acc not improving for 30 epochs')
             break
         train_loss, train_acc = trainer.train()
         valid_loss, valid_acc = trainer.valid()
@@ -128,7 +133,7 @@ def main():
         else:
             bad_cnt += 1
         
-        print('epoch: {}/{} | Train Loss: {} | Train acc: {} | Valid Loss: {} | Valid acc: {}'.format(
+        logger.info('epoch: {}/{} | Train Loss: {} | Train acc: {} | Valid Loss: {} | Valid acc: {}'.format(
             epoch+1, args.epochs, train_loss, train_acc, valid_loss, valid_acc))
 
         trainer.save_checkpoint(epoch, best_acc, valid_acc, 
