@@ -143,8 +143,8 @@ def main():
             extract(X_test, args, model, 'test')
         else:
             #Pretrain  in one single file
-            files, _ = train_test_split(files,test_size=0.5,random_state=42)
-            files.extend([str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir+"/scena") for d in filenames])
+            files, _ = train_test_split(files,test_size=0.6,random_state=42)
+            files.extend([str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir+"/orchestra") for d in filenames if d[-3:] == "mid"])
             extract(files, args, model)
         
 
