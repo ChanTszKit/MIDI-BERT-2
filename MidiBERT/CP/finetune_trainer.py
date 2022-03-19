@@ -74,7 +74,7 @@ class FinetuneTrainer:
         return test_loss, test_acc, all_output
 
     def iteration(self, training_data, mode, seq):
-        pbar = tqdm.tqdm(training_data, disable=False)
+        pbar = tqdm.tqdm(training_data, disable=True)
 
         total_acc, total_cnt, total_loss = 1, 1, 0
 
