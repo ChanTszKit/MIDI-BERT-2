@@ -14,7 +14,7 @@ DEFAULT_RESOLUTION = 480
 
 # define "Item" for general storage
 class Item(object):
-    def __init__(self, name, start, end, velocity, pitch, Type,shift=-1):
+    def __init__(self, name, start, end, velocity, pitch, Type,shift=0):
         self.name = name
         self.start = start
         self.end = end
@@ -143,7 +143,7 @@ def read_items(file_path,is_reduction=False):
     tempo_items = output
 
     if is_reduction:
-        notep,tpbp = read_midi(os.path.join(file_path,"orchestra.mid"))
+        notep,tpbp = read_midi(os.path.join(file_path,"piano.mid"))
         if tpbp != tpbo:
             print("GG tpb different")
             return note_items,tempo_items,None

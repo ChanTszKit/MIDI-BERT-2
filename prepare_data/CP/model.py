@@ -69,7 +69,7 @@ class CP(object):
             print(path)
             events, histp  = self.extract_events(path, task)
             if task == 'reduction' and histp is None:
-                print("skipped")
+                print("skipped_nop")
                 continue
             # print(histp)
             # events to words
@@ -92,12 +92,14 @@ class CP(object):
                 
                 if task=='reduction':
                     # print(interval[0],interval[1],pitch)
-                    if find_intersect(interval[0],interval[1],histp[pitch]):
+                    if pitch not in histp:
+                        ys.append(2)
+                    elif find_intersect(interval[0],interval[1],histp[pitch]):
                         ys.append(1)
                     else:
                         ys.append(2)
-            ys = np.array(ys)
-            kept_percentage = np.count_nonzero(ys == 1) / len(ys)
+            ysn = np.array(ys)
+            kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
             print(kept_percentage)
             if kept_percentage < 0.4 or kept_percentage > 0.9:
                 print("skipped")
