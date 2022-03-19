@@ -74,84 +74,87 @@ class CP(object):
 
         for path in midi_paths:
             # extract events
-            logger.info(path)
-            events, histp  = self.extract_events(path, task)
-            if len(events) == 0:
-                continue
-            if task == 'reduction' and histp is None:
-                print("skipped_nop")
-                continue
-            # print(histp)
-            # events to words
-            words, ys = [], []
-            i = 0
-            for note_tuple in events:
-                nts, to_class = [], -1
-                pitch, interval = None, None
-                for e in note_tuple:
-                    if e.name == 'genLabel':
-                        interval = e.value
+            try:
+                logger.info(path)
+                events, histp  = self.extract_events(path, task)
+                if len(events) == 0:
+                    continue
+                if task == 'reduction' and histp is None:
+                    print("skipped_nop")
+                    continue
+                # print(histp)
+                # events to words
+                words, ys = [], []
+                i = 0
+                for note_tuple in events:
+                    nts, to_class = [], -1
+                    pitch, interval = None, None
+                    for e in note_tuple:
+                        if e.name == 'genLabel':
+                            interval = e.value
+                            continue
+                        e_text = '{} {}'.format(e.name, e.value)
+                        nts.append(self.event2word[e.name][e_text])
+                        if e.name == 'Pitch':
+                            to_class = e.Type
+                            pitch = e.value
+                    words.append(nts)
+                    if task == 'melody' or task == 'velocity':
+                        ys.append(to_class+1)
+                    
+                    if task=='reduction':
+                        if pitch not in histp:
+                            ys.append(2)
+                        elif find_intersect(interval[0],interval[1],histp[pitch]):
+                            ys.append(1)
+                        else:
+                            ys.append(2)
+                            
+                            
+                if task=='custom':
+                    slice_words=[]
+                    for i in range(0, len(words), max_len):
+                        slice_words.append(words[i:i+max_len])
+                    if len(slice_words[-1]) < max_len:
+                        slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
+                    return np.array(slice_words),None
+
+                if task == "reduction":            
+                    ysn = np.array(ys)
+                    kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
+                    print(kept_percentage)
+                    if kept_percentage < 0.4 or kept_percentage > 0.9:
+                        print("skipped")
                         continue
-                    e_text = '{} {}'.format(e.name, e.value)
-                    nts.append(self.event2word[e.name][e_text])
-                    if e.name == 'Pitch':
-                        to_class = e.Type
-                        pitch = e.value
-                words.append(nts)
-                if task == 'melody' or task == 'velocity':
-                    ys.append(to_class+1)
-                
-                if task=='reduction':
-                    if pitch not in histp:
-                        ys.append(2)
-                    elif find_intersect(interval[0],interval[1],histp[pitch]):
-                        ys.append(1)
-                    else:
-                        ys.append(2)
-                        
-                        
-            if task=='custom':
-                slice_words=[]
+                # slice to chunks so that max length = max_len (default: 512)
+                slice_words, slice_ys = [], []
                 for i in range(0, len(words), max_len):
                     slice_words.append(words[i:i+max_len])
+                    if task == "composer":
+                        name = path.split('/')[-2]
+                        slice_ys.append(Composer[name])
+                    elif task == "emotion":
+                        name = path.split('/')[-1].split('_')[0]
+                        slice_ys.append(Emotion[name])
+                    else:
+                        slice_ys.append(ys[i:i+max_len])
+                
+                # padding or drop
+                # drop only when the task is 'composer' and the data length < max_len//2
                 if len(slice_words[-1]) < max_len:
-                    slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
-                return np.array(slice_words),None
+                    if task == 'composer' and len(slice_words[-1]) < max_len//2:
+                        slice_words.pop()
+                        slice_ys.pop()
+                    else:
+                        slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
 
-            if task == "reduction":            
-                ysn = np.array(ys)
-                kept_percentage = np.count_nonzero(ysn == 1) / len(ysn)
-                print(kept_percentage)
-                if kept_percentage < 0.4 or kept_percentage > 0.9:
-                    print("skipped")
-                    continue
-            # slice to chunks so that max length = max_len (default: 512)
-            slice_words, slice_ys = [], []
-            for i in range(0, len(words), max_len):
-                slice_words.append(words[i:i+max_len])
-                if task == "composer":
-                    name = path.split('/')[-2]
-                    slice_ys.append(Composer[name])
-                elif task == "emotion":
-                    name = path.split('/')[-1].split('_')[0]
-                    slice_ys.append(Emotion[name])
-                else:
-                    slice_ys.append(ys[i:i+max_len])
-            
-            # padding or drop
-            # drop only when the task is 'composer' and the data length < max_len//2
-            if len(slice_words[-1]) < max_len:
-                if task == 'composer' and len(slice_words[-1]) < max_len//2:
-                    slice_words.pop()
-                    slice_ys.pop()
-                else:
-                    slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
-
-            if (task == 'melody' or task == 'velocity' or task =='reduction') and len(slice_ys[-1]) < max_len:
-                slice_ys[-1] = self.padding(slice_ys[-1], max_len, ans=True)
-            
-            all_words = all_words + slice_words
-            all_ys = all_ys + slice_ys
+                if (task == 'melody' or task == 'velocity' or task =='reduction') and len(slice_ys[-1]) < max_len:
+                    slice_ys[-1] = self.padding(slice_ys[-1], max_len, ans=True)
+                
+                all_words = all_words + slice_words
+                all_ys = all_ys + slice_ys
+            except Exception as e:
+                logger.error(e)
     
         all_words = np.array(all_words).astype(np.int64)
         all_ys = np.array(all_ys).astype(np.int64)
