@@ -3,3 +3,39 @@ Loading pre-trained model from pretrain_model.ckpt
 Epoch 1: train_loss=1.0214, valid_loss=0.874, test_loss=0.8585, train_acc=0.4951, valid_acc=0.4542, test_acc=0.5244
 Loading pre-trained model from pretrain_model.ckpt
 Epoch 1: train_loss=1.0158, valid_loss=0.8541, test_loss=0.857, train_acc=0.4937, valid_acc=0.4971, test_acc=0.5049
+Loading pre-trained model from pretrain_model.ckpt
+Loading pre-trained model from pretrain_model.ckpt
+Loading pre-trained model from pretrain_model.ckpt
+Epoch 1: train_loss=0.607, valid_loss=0.631, test_loss=0.5879, train_acc=0.6794, valid_acc=0.6432, test_acc=0.6881
+Epoch 2: train_loss=0.5594, valid_loss=0.6164, test_loss=0.576, train_acc=0.7086, valid_acc=0.6645, test_acc=0.7019
+Loading pre-trained model from pretrain_model.ckpt
+Epoch 1: train_loss=0.6069, valid_loss=0.6314, test_loss=0.5886, train_acc=0.6796, valid_acc=0.6428, test_acc=0.6871
+Epoch 2: train_loss=0.5591, valid_loss=0.6162, test_loss=0.5762, train_acc=0.709, valid_acc=0.6632, test_acc=0.7018
+Epoch 3: train_loss=0.5225, valid_loss=0.618, test_loss=0.5859, train_acc=0.7353, valid_acc=0.6656, test_acc=0.6936
+Epoch 4: train_loss=0.4806, valid_loss=0.6396, test_loss=0.5991, train_acc=0.7632, valid_acc=0.6617, test_acc=0.6901
+Epoch 5: train_loss=0.4388, valid_loss=0.6523, test_loss=0.6631, train_acc=0.7897, valid_acc=0.683, test_acc=0.6966
+Epoch 6: train_loss=0.3983, valid_loss=0.6333, test_loss=0.635, train_acc=0.8123, valid_acc=0.6817, test_acc=0.6843
+Epoch 7: train_loss=0.3583, valid_loss=0.6536, test_loss=0.6649, train_acc=0.8346, valid_acc=0.6867, test_acc=0.6931
+Epoch 8: train_loss=0.3248, valid_loss=0.7142, test_loss=0.7174, train_acc=0.8524, valid_acc=0.6814, test_acc=0.6878
+Epoch 9: train_loss=0.2958, valid_loss=0.7169, test_loss=0.7325, train_acc=0.8679, valid_acc=0.69, test_acc=0.6876
+Epoch 10: train_loss=0.2638, valid_loss=0.8166, test_loss=0.84, train_acc=0.884, valid_acc=0.6854, test_acc=0.6873
+Epoch 11: train_loss=0.2409, valid_loss=0.8411, test_loss=0.8471, train_acc=0.8942, valid_acc=0.6929, test_acc=0.6918
+Epoch 12: train_loss=0.2208, valid_loss=0.9048, test_loss=0.9415, train_acc=0.9033, valid_acc=0.6874, test_acc=0.6868
+Epoch 13: train_loss=0.2034, valid_loss=0.8951, test_loss=0.9502, train_acc=0.9119, valid_acc=0.6908, test_acc=0.6807
+Epoch 14: train_loss=0.1837, valid_loss=0.9555, test_loss=1.0142, train_acc=0.9214, valid_acc=0.6912, test_acc=0.6894
+Epoch 15: train_loss=0.1673, valid_loss=0.9545, test_loss=1.0133, train_acc=0.9285, valid_acc=0.6919, test_acc=0.6866
+Epoch 16: train_loss=0.1537, valid_loss=1.093, test_loss=1.1216, train_acc=0.935, valid_acc=0.6886, test_acc=0.6879
+Epoch 17: train_loss=0.1387, valid_loss=1.1986, test_loss=1.2412, train_acc=0.9416, valid_acc=0.6917, test_acc=0.6908
+Epoch 18: train_loss=0.1279, valid_loss=1.1502, test_loss=1.2317, train_acc=0.9463, valid_acc=0.6967, test_acc=0.6885
+Epoch 19: train_loss=0.1157, valid_loss=1.1852, test_loss=1.2764, train_acc=0.9513, valid_acc=0.6926, test_acc=0.6831
+Epoch 20: train_loss=0.107, valid_loss=1.2352, test_loss=1.3164, train_acc=0.9552, valid_acc=0.6929, test_acc=0.6804
+Epoch 21: train_loss=0.101, valid_loss=1.2791, test_loss=1.4085, train_acc=0.958, valid_acc=0.6912, test_acc=0.6799
+Epoch 22: train_loss=0.0926, valid_loss=1.3893, test_loss=1.4702, train_acc=0.9617, valid_acc=0.6901, test_acc=0.6859
+Epoch 23: train_loss=0.0852, valid_loss=1.3332, test_loss=1.4434, train_acc=0.9646, valid_acc=0.6926, test_acc=0.6829
+Epoch 24: train_loss=0.0784, valid_loss=1.4376, test_loss=1.5531, train_acc=0.9677, valid_acc=0.6946, test_acc=0.6822
+Epoch 25: train_loss=0.0736, valid_loss=1.4084, test_loss=1.5418, train_acc=0.9695, valid_acc=0.6958, test_acc=0.6821
+Epoch 26: train_loss=0.0695, valid_loss=1.4258, test_loss=1.5396, train_acc=0.9715, valid_acc=0.6931, test_acc=0.6847
+Epoch 27: train_loss=0.0653, valid_loss=1.5353, test_loss=1.641, train_acc=0.9733, valid_acc=0.6978, test_acc=0.6876
+Epoch 28: train_loss=0.0613, valid_loss=1.4742, test_loss=1.567, train_acc=0.975, valid_acc=0.6958, test_acc=0.6859
+Epoch 29: train_loss=0.0558, valid_loss=1.6288, test_loss=1.7609, train_acc=0.9773, valid_acc=0.6955, test_acc=0.6857
+Epoch 30: train_loss=0.0526, valid_loss=1.582, test_loss=1.7239, train_acc=0.9783, valid_acc=0.6962, test_acc=0.6852

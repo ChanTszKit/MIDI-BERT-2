@@ -251,6 +251,7 @@ def main():
         print(current_beat)
             
     elif args.task=='reduction':
+        ccount=0
         out = mid_parser.MidiFile()
         out.ticks_per_beat = 480
         out.instruments = [ct.Instrument(program=0,is_drum=False,name='reduction')]
@@ -260,11 +261,12 @@ def main():
                 n=X[idx1][idx2]
                 if n[0]==0:
                     current_beat+=1
-
-           
+                if all_output[idx1][idx2]==2:
+                   ccount+=1
                 if all_output[idx1][idx2]==1:
                     out.instruments[0].notes.append(ct.Note(start=current_beat*4*480+n[1]*120,end=current_beat*4*480+n[1]*120+n[3]*60,pitch=n[2]+22,velocity=30))
         out.dump('reduction.mid')
+        print(f'reduced {ccount} notes')
         
         out = mid_parser.MidiFile()
         out.ticks_per_beat = 480

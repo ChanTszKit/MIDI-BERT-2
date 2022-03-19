@@ -1,6 +1,7 @@
 import numpy as np
 import miditoolkit
 import copy
+import os
 
 # parameters for input
 DEFAULT_VELOCITY_BINS = np.array([ 0, 32, 48, 64, 80, 96, 128])     # np.linspace(0, 128, 32+1, dtype=np.int)
@@ -13,34 +14,96 @@ DEFAULT_RESOLUTION = 480
 
 # define "Item" for general storage
 class Item(object):
-    def __init__(self, name, start, end, velocity, pitch, Type):
+    def __init__(self, name, start, end, velocity, pitch, Type,shift=0):
         self.name = name
         self.start = start
         self.end = end
         self.velocity = velocity
         self.pitch = pitch
         self.Type = Type
+        self.shift = shift
 
     def __repr__(self):
         return 'Item(name={}, start={}, end={}, velocity={}, pitch={}, Type={})'.format(
             self.name, self.start, self.end, self.velocity, self.pitch, self.Type)
 
+def read_midi(path):
+    mido_obj = miditoolkit.midi.parser.MidiFile(path)
+    tick_per_beat = mido_obj.ticks_per_beat
+
+    notes = [] 
+    for instrument in mido_obj.instruments:
+        if instrument.is_drum:
+            continue
+        for note in instrument.notes:
+            #rescale tpb to 480
+            note.start = int(note.start/tick_per_beat*DEFAULT_RESOLUTION)
+            note.end=int(note.end/tick_per_beat*DEFAULT_RESOLUTION)
+            notes.append(note)
+
+    # sort by start time
+    notes.sort(key=lambda note:note.start)
+    return notes,480
+
+def mergeIntervals(arr):
+        # Sorting based on the increasing order 
+        # of the start intervals
+        arr.sort(key = lambda x: x[0]) 
+        # array to hold the merged intervals
+        m = []
+        s = -10000
+        max = -100000
+        for i in range(len(arr)):
+            a = arr[i]
+            if a[0] > max:
+                if i != 0:
+                    m.append([s,max])
+                max = a[1]
+                s = a[0]
+            else:
+                if a[1] >= max:
+                    max = a[1]        
+        #'max' value gives the last point of 
+        # that particular interval
+        # 's' gives the starting point of that interval
+        # 'm' array contains the list of all merged intervals
+        if max != -100000 and [s, max] not in m:
+            m.append([s, max])
+        return m
+
+def interval_histogram(notep):
+    hist_p = dict()
+    for note in notep:
+        if note.pitch in hist_p:
+            hist_p[note.pitch].append([note.start,note.end])
+            hist_p[note.pitch] = mergeIntervals(hist_p[note.pitch])
+        else:
+            hist_p[note.pitch] = [[note.start,note.end]]    
+    return hist_p
+
 # read notes and tempo changes from midi (assume there is only one track)
-def read_items(file_path):
-    midi_obj = miditoolkit.midi.parser.MidiFile(file_path)
+def read_items(file_path,is_reduction=False):
+    if is_reduction:
+        midi_obj = miditoolkit.midi.parser.MidiFile(os.path.join(file_path,"orchestra.mid"))
+        
+    else:
+        midi_obj = miditoolkit.midi.parser.MidiFile(file_path)
     # note
     note_items = []
     num_of_instr = len(midi_obj.instruments) 
+    tpbo = midi_obj.ticks_per_beat
     
     for i in range(num_of_instr):
+        if midi_obj.instruments[i].is_drum:
+            continue
         notes = midi_obj.instruments[i].notes
         notes.sort(key=lambda x: (x.start, x.pitch))
 
         for note in notes:
             note_items.append(Item(
                 name='Note',
-                start=note.start, 
-                end=note.end, 
+                start=int(note.start/tpbo*DEFAULT_RESOLUTION), 
+                end=int(note.end/tpbo*DEFAULT_RESOLUTION), 
                 velocity=note.velocity, 
                 pitch=note.pitch,
                 Type=i))
@@ -82,6 +145,15 @@ def read_items(file_path):
                 pitch=output[-1].pitch,
                 Type=-1))
     tempo_items = output
+
+    if is_reduction:
+        notep,tpbp = read_midi(os.path.join(file_path,"piano.mid"))
+        if tpbp != tpbo:
+            print("GG tpb different")
+            return note_items,tempo_items,None
+        histp = interval_histogram(notep)
+        return note_items,tempo_items,histp
+
     return note_items, tempo_items
 
 
@@ -162,7 +234,15 @@ def item2event(groups, task):
                 value=index,
                 text='{}/{}'.format(duration, DEFAULT_DURATION_BINS[index]),
                 Type=-1))
-
+            
+            if task == 'reduction':
+                note_tuple.append(Event(
+                    name='genLabel',
+                    time=item.start,
+                    value=(item.start-item.shift,item.end-item.shift),
+                    text='{},{}'.format(item.start,item.end),
+                    Type=-1
+                ))
             events.append(note_tuple)
 
     return events
@@ -176,6 +256,7 @@ def quantize_items(items, ticks=120):
         shift = grids[index] - item.start
         item.start += shift
         item.end += shift
+        item.shift = shift
     return items      
 
 

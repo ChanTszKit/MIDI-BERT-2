@@ -36,11 +36,14 @@ def read_midi(path):
         if instrument.is_drum:
             continue
         for note in instrument.notes:
+            #rescale tpb to 480
+            note.start = int(note.start/tick_per_beat*DEFAULT_RESOLUTION)
+            note.end=int(note.end/tick_per_beat*DEFAULT_RESOLUTION)
             notes.append(note)
 
     # sort by start time
     notes.sort(key=lambda note:note.start)
-    return notes,tick_per_beat
+    return notes,480
 
 def mergeIntervals(arr):
         # Sorting based on the increasing order 
@@ -82,12 +85,13 @@ def interval_histogram(notep):
 def read_items(file_path,is_reduction=False):
     if is_reduction:
         midi_obj = miditoolkit.midi.parser.MidiFile(os.path.join(file_path,"orchestra.mid"))
-        tpbo = midi_obj.ticks_per_beat
+        
     else:
         midi_obj = miditoolkit.midi.parser.MidiFile(file_path)
     # note
     note_items = []
     num_of_instr = len(midi_obj.instruments) 
+    tpbo = midi_obj.ticks_per_beat
     
     for i in range(num_of_instr):
         if midi_obj.instruments[i].is_drum:
@@ -98,8 +102,8 @@ def read_items(file_path,is_reduction=False):
         for note in notes:
             note_items.append(Item(
                 name='Note',
-                start=note.start, 
-                end=note.end, 
+                start=int(note.start/tpbo*DEFAULT_RESOLUTION), 
+                end=int(note.end/tpbo*DEFAULT_RESOLUTION), 
                 velocity=note.velocity, 
                 pitch=note.pitch,
                 Type=i))
