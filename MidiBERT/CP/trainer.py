@@ -133,8 +133,8 @@ class BERTTrainer:
 
             # acc
             accs = list(map(float, all_acc))
-            sys.stdout.write('Loss: {:06f} | loss: {:03f}, {:03f}, {:03f}, {:03f} | acc: {:03f}, {:03f}, {:03f}, {:03f} \r'.format(
-                total_loss, *losses, *accs)) 
+            # sys.stdout.write('Loss: {:06f} | loss: {:03f}, {:03f}, {:03f}, {:03f} | acc: {:03f}, {:03f}, {:03f}, {:03f} \r'.format(
+            #     total_loss, *losses, *accs)) 
 
             losses = list(map(float, losses))
             total_losses += total_loss.item()
