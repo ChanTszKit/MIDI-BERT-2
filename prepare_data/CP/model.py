@@ -49,6 +49,8 @@ class CP(object):
         else:
             note_items, tempo_items = utils.read_items(input_path)
             pianohist = None
+        if len(note_items) == 0:
+            return [],None
         note_items = utils.quantize_items(note_items)
         max_time = note_items[-1].end
         items = tempo_items + note_items
@@ -74,6 +76,8 @@ class CP(object):
             # extract events
             logger.info(path)
             events, histp  = self.extract_events(path, task)
+            if len(events) == 0:
+                continue
             if task == 'reduction' and histp is None:
                 print("skipped_nop")
                 continue

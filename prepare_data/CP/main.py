@@ -121,7 +121,7 @@ def main():
         files = [f'../../Dataset/asap-dataset/{file}' for file in files]
     
     elif args.input_dir:
-        files = glob.glob(f'{args.input_dir}/*.mid')
+        files = glob.glob(f'{args.input_dir}/GiantMIDI_piano/midis_v1.1/*.mid')
 
     else:
         print('not supported')
@@ -142,7 +142,9 @@ def main():
             extract(X_val, args, model, 'valid')
             extract(X_test, args, model, 'test')
         else:
-            # in one single file
+            #Pretrain  in one single file
+            files, _ = train_test_split(files,test_size=0.5,random_state=42)
+            files.extend([str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir+"/scena") for d in filenames])
             extract(files, args, model)
         
 
