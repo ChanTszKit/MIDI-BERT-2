@@ -10,6 +10,8 @@ from sklearn.model_selection import train_test_split
 def get_args():
     parser = argparse.ArgumentParser(description='')
     ### mode ###
+    # custom mode is for case study:
+    # - custom mode only expect ONE single score in the input folder
     parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction','custom'])
 
     ### path ###
