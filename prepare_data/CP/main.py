@@ -142,10 +142,14 @@ def main():
             extract(X_val, args, model, 'valid')
             extract(X_test, args, model, 'test')
         else:
-            #Pretrain  in one single file
-            files, _ = train_test_split(files,test_size=0.6,random_state=42)
-            files.extend([str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir+"/orchestra") for d in filenames if d[-3:] == "mid"])
-            extract(files, args, model)
+            if args.task=='custom':
+                files = glob.glob(f'{args.input_dir}/*.mid')
+                extract(files, args, model)
+            else:
+                #Pretrain  in one single file
+                files, _ = train_test_split(files,test_size=0.6,random_state=42)
+                files.extend([str(pathlib.PurePosixPath(root,d)) for root, dir, filenames in os.walk(args.input_dir+"/orchestra") for d in filenames if d[-3:] == "mid"])
+                extract(files, args, model)
         
 
 if __name__ == '__main__':
