@@ -350,7 +350,7 @@ parser.add_argument("-f", "--file", dest="filename",
                     help="FILE to be processed", metavar="FILE")
 args = parser.parse_args()
 # main
-merge_threshold=-1# #minimum separation between notes in same pitch
+merge_threshold= 2 # #minimum separation between notes in same pitch
 discrete_note_threshold=1 #minimum length of a note
 
 notes,tick_per_beat = read_midi(args.filename)
@@ -378,7 +378,7 @@ while True:
     cur_notes=len(notes)
     print(f'after post-processing, total notes: {cur_notes}, removed {org_notes-cur_notes} notes in total')
     visualize(notes[:100],centers_per_beat[:30],tick_per_beat)
-    write_midi(notes, "post_processed2.mid", tick_per_beat)
+    write_midi(notes, "post_processed.mid", tick_per_beat)
     
     #termination
     if org_notes-cur_notes<10:        

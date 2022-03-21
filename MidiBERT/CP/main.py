@@ -1,4 +1,5 @@
 import argparse
+from MidiBERT.CP.model import MidiBertSeq2Seq
 import numpy as np
 import random
 import pickle
@@ -35,6 +36,7 @@ def get_args():
     parser.add_argument('--hs', type=int, default=768)      # hidden state
     parser.add_argument('--epochs', type=int, default=500, help='number of training epochs')
     parser.add_argument('--lr', type=float, default=2e-5, help='initial learning rate')
+    parser.add_argument('--mode', type=str, default='bert', help='bert or seq2seq')
     
     ### cuda ###
     parser.add_argument("--cpu", action="store_true")   # default: False
@@ -60,7 +62,7 @@ def load_data(datasets):
             data = np.load(os.path.join(root, f'{dataset}.npy'), allow_pickle=True)
         
         elif dataset == "gpo":
-            data = np.load(os.path.join(root,"giantpianoandorch.npy"),allow_pickle=True)
+            data = np.load(os.path.join(root,"testcase.npy"),allow_pickle=True)
 
         logger.info(f'   {dataset}: {data.shape}')
         to_concat.append(data)
@@ -101,7 +103,22 @@ def main():
     configuration = BertConfig(max_position_embeddings=args.max_seq_len,
                                 position_embedding_type='relative_key_query',
                                 hidden_size=args.hs)
-    midibert = MidiBert(bertConfig=configuration, e2w=e2w, w2e=w2e)
+    if args.mode == "seq2seq":
+        config_en = BertConfig(max_position_embeddings=args.max_seq_len,
+                                    position_embedding_type='relative_key_query',
+                                    hidden_size=args.hs)
+        config_de = BertConfig(max_position_embeddings=args.max_seq_len,
+                                    position_embedding_type='relative_key_query',
+                                    hidden_size=args.hs)
+        config_de.is_decoder = True
+        config_de.add_cross_attention = True
+        midibert = MidiBertSeq2Seq(config_en,config_de,e2w,w2e)
+    
+    else:
+        configuration = BertConfig(max_position_embeddings=args.max_seq_len,
+                                    position_embedding_type='relative_key_query',
+                                    hidden_size=args.hs)
+        midibert = MidiBert(bertConfig=configuration, e2w=e2w, w2e=w2e)
 
     logger.info("\nCreating BERT Trainer")
     trainer = BERTTrainer(midibert, train_loader, valid_loader, args.lr, args.batch_size, args.max_seq_len, args.mask_percent, args.cpu, args.cuda_devices)
