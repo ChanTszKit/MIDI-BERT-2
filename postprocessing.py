@@ -352,7 +352,7 @@ parser.add_argument("-o", "--output", dest="fileout",
                     help="FILE to be output", metavar="FILEo")
 args = parser.parse_args()
 # main
-merge_threshold=-1# #minimum separation between notes in same pitch
+merge_threshold=1# #minimum separation between notes in same pitch
 discrete_note_threshold=1 #minimum length of a note
 
 notes,tick_per_beat = read_midi(args.filename)
@@ -381,10 +381,14 @@ while True:
     print(f'after post-processing, total notes: {cur_notes}, removed {org_notes-cur_notes} notes in total')
 <<<<<<< Updated upstream
     visualize(notes[:100],centers_per_beat[:30],tick_per_beat)
+<<<<<<< Updated upstream
     write_midi(notes, "post_processed2.mid", tick_per_beat)
 =======
     # visualize(notes[:100],centers_per_beat[:30],tick_per_beat)
     write_midi(notes, args.fileout, tick_per_beat)
+>>>>>>> Stashed changes
+=======
+    write_midi(notes, "post_processed.mid", tick_per_beat)
 >>>>>>> Stashed changes
     
     #termination
