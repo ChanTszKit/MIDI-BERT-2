@@ -42,6 +42,7 @@ class CP(object):
         self.event2word, self.word2event = pickle.load(open(dict, 'rb'))
         # pad word: ['Bar <PAD>', 'Position <PAD>', 'Pitch <PAD>', 'Duration <PAD>']
         self.pad_word = [self.event2word[etype]['%s <PAD>' % etype] for etype in self.event2word]
+        self.EOS = [self.event2word[etype]['%s <EOS>' % etype] for etype in self.event2word]
 
     def extract_events(self, input_path, task):
         if task == "reduction":
@@ -118,6 +119,9 @@ class CP(object):
                     if len(slice_words[-1]) < max_len:
                         slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
                     return np.array(slice_words),None
+                
+
+                
 
                 if task == "reduction":            
                     ysn = np.array(ys)
@@ -127,6 +131,8 @@ class CP(object):
                         print("skipped")
                         continue
                 # slice to chunks so that max length = max_len (default: 512)
+                if task == 'skyline':
+                    words.append(self.EOS)
                 slice_words, slice_ys = [], []
                 for i in range(0, len(words), max_len):
                     slice_words.append(words[i:i+max_len])
@@ -145,6 +151,9 @@ class CP(object):
                     if task == 'composer' and len(slice_words[-1]) < max_len//2:
                         slice_words.pop()
                         slice_ys.pop()
+                    elif task=='skyline':
+                        slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
+                        
                     else:
                         slice_words[-1] = self.padding(slice_words[-1], max_len, ans=False)
 
