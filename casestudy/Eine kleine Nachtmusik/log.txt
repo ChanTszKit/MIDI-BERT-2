@@ -1,7 +1,0 @@
-org 6656
-red 3739
-
-reduction:
--1653 notes
-post-processing:
--1264 notes

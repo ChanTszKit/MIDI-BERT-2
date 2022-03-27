@@ -1,7 +1,0 @@
-org 6133
-red 1787
-
-reduction:
--2826notes
-post:
--1520 notes

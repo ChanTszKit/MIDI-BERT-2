@@ -1,0 +1,1 @@
+original_size:7709  -  reduced_size:5573  -  postprocessed_size:3547 
