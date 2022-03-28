@@ -379,17 +379,8 @@ while True:
     notes = doubling_simplification(notes,centers_per_beat, tick_per_beat)
     cur_notes=len(notes)
     print(f'after post-processing, total notes: {cur_notes}, removed {org_notes-cur_notes} notes in total')
-<<<<<<< Updated upstream
-    visualize(notes[:100],centers_per_beat[:30],tick_per_beat)
-<<<<<<< Updated upstream
-    write_midi(notes, "post_processed2.mid", tick_per_beat)
-=======
     # visualize(notes[:100],centers_per_beat[:30],tick_per_beat)
     write_midi(notes, args.fileout, tick_per_beat)
->>>>>>> Stashed changes
-=======
-    write_midi(notes, "post_processed.mid", tick_per_beat)
->>>>>>> Stashed changes
     
     #termination
     if org_notes-cur_notes<10:        
