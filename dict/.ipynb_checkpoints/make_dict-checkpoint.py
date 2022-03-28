@@ -19,6 +19,14 @@ def special_tok(cnt, cls):
     event2word[cls][cls+' <MASK>'] = cnt
     word2event[cls][cnt] = cls+' <MASK>'
     cnt += 1
+    
+    event2word[cls][cls+' <EOS>'] = cnt
+    word2event[cls][cnt] = cls+' <EOS>'
+    cnt += 1
+    
+    event2word[cls][cls+' <ABS>'] = cnt
+    word2event[cls][cnt] = cls+' <ABS>'
+    cnt += 1
 
 
 # Bar
@@ -63,6 +71,6 @@ print(event2word)
 print(word2event)
 t = (event2word, word2event)
 
-with open('CP.pkl', 'wb') as f:
+with open('CP_skyline.pkl', 'wb') as f:
     pickle.dump(t, f)
 

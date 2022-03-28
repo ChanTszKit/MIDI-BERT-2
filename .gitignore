@@ -2,4 +2,5 @@
 *.mid
 *.pyc
 *.cpython-36.pyc
+*.npy
 __pycache__/

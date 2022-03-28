@@ -1,8 +1,0 @@
-org : 11264 notes
-final: 3432 notes
-
-reduction:
-reduced 4473 notes
-
-post-processing:
-reduced 3359 notes

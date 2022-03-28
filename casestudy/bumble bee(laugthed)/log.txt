@@ -1,7 +1,0 @@
-org 1484
-red 567
-
-reduction:
--152notes
-post-processing:
-- 765notes

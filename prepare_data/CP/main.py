@@ -12,7 +12,7 @@ def get_args():
     ### mode ###
     # custom mode is for case study:
     # - custom mode only expect ONE single score in the input folder
-    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction','custom'])
+    parser.add_argument('-t', '--task', default='', choices=['melody', 'velocity', 'composer', 'emotion', 'reduction','custom','skyline'])
 
     ### path ###
     parser.add_argument('--dict', type=str, default='../../dict/CP.pkl')
@@ -63,6 +63,8 @@ def extract(files, args, model, mode=''):
         output_file = os.path.join(args.output_dir, f'custom_reduction_{mode}.npy')
     elif args.task =='custom':
         output_file = os.path.join(args.output_dir, f'{args.name}.npy')
+    elif args.task=='skyline':
+        output_file=os.path.join(args.output_dir,f'{args.name}.npy')
     elif args.input_dir != '':
         if args.name == '':
             args.name = os.path.basename(os.path.normpath(args.input_dir))
@@ -76,7 +78,7 @@ def extract(files, args, model, mode=''):
     np.save(output_file, segments)
     print(f'Data shape: {segments.shape}, saved at {output_file}')
 
-    if args.task != '' and args.task!='custom':
+    if args.task != '' and args.task!='custom' and args.task!='skyline':
         if args.task == 'melody' or args.task == 'velocity':
             ans_file = os.path.join(args.output_dir, f'{dataset}_{mode}_{args.task[:3]}ans.npy')
         elif args.task == 'composer' or args.task == 'emotion':
@@ -119,7 +121,11 @@ def main():
     elif args.dataset == 'ASAP':
         files = pickle.load(open('../../Dataset/ASAP_song.pkl', 'rb'))
         files = [f'../../Dataset/asap-dataset/{file}' for file in files]
-    
+    elif args.task=='skyline':
+        if not args.input_dir:
+            print('please specify input_dir')
+        else:
+            files = glob.glob(f'{args.input_dir}/*.mid')
     elif args.input_dir:
         files = glob.glob(f'{args.input_dir}/GiantMIDI_piano/midis_v1.1/*.mid')
 
@@ -141,6 +147,9 @@ def main():
             extract(X_train, args, model, 'train')
             extract(X_val, args, model, 'valid')
             extract(X_test, args, model, 'test')
+        elif args.task=='skyline':
+            files = glob.glob(f'{args.input_dir}/*.mid')
+            extract(files,args,model)
         else:
             if args.task=='custom':
                 files = glob.glob(f'{args.input_dir}/*.mid')
