@@ -151,6 +151,7 @@ class Skyline:
         allsong_skyline_tokens = []
         allsong_full_tokens = []
         for token in all_tokens:
+            token = np.array(token)
             if not ((token == self.PAD).all() or (token == self.EOS).all()):
                 if token[0] == 0:
                     current_bar += 1
