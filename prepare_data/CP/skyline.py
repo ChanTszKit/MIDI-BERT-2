@@ -8,18 +8,18 @@ class Skyline:
     def __init__(self, dict):
         self.event2word, self.word2event = pickle.load(open(dict, "rb"))
         # pad word: ['Bar <PAD>', 'Position <PAD>', 'Pitch <PAD>', 'Duration <PAD>']
-        self.PAD = [
-            self.event2word[etype]["%s <PAD>" % etype] for etype in self.event2word
-        ]
-        self.EOS = [
-            self.event2word[etype]["%s <EOS>" % etype] for etype in self.event2word
-        ]
-        self.BOS = [
-            self.event2word[etype]["%s <BOS>" % etype] for etype in self.event2word
-        ]
-        self.ABS = [
-            self.event2word[etype]["%s <ABS>" % etype] for etype in self.event2word
-        ]
+        self.PAD = np.array(
+            [self.event2word[etype]["%s <PAD>" % etype] for etype in self.event2word]
+        )
+        self.EOS = np.array(
+            [self.event2word[etype]["%s <EOS>" % etype] for etype in self.event2word]
+        )
+        self.BOS = np.array(
+            [self.event2word[etype]["%s <BOS>" % etype] for etype in self.event2word]
+        )
+        self.ABS = np.array(
+            [self.event2word[etype]["%s <ABS>" % etype] for etype in self.event2word]
+        )
         self.skyline_max_len = 90  # parameters
         self.full_max_len = 512
 
