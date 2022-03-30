@@ -32,7 +32,7 @@ def get_args():
         nargs="+",
         default=["pop909", "composer", "pop1k7", "ASAP", "emopia"],
     )
-
+    parser.add_argument("--checkpoint", type=str, default="continue2")
     ### parameter setting ###
     parser.add_argument("--num_workers", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=6)
@@ -160,8 +160,8 @@ def main():
         )
         config_de.is_decoder = True
         config_de.add_cross_attention = True
-        config = EncoderDecoderConfig.from_encoder_decoder_configs(config_en, config_de)
-        midibert = MidiBertSeq2Seq(config, e2w, w2e)
+
+        midibert = MidiBertSeq2Seq(config_en, config_de, args.checkpoint, e2w, w2e)
         logger.info("\nCreating BERT Trainer")
         trainer = BERTSeq2SeqTrainer(
             midibert,

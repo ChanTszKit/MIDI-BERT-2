@@ -4,7 +4,7 @@ import random
 
 import torch
 import torch.nn as nn
-from transformers import BertModel, EncoderDecoderModel
+from transformers import BertModel, EncoderDecoderModel, EncoderDecoderConfig
 
 
 class Embeddings(nn.Module):
@@ -87,13 +87,28 @@ class MidiBert(nn.Module):
 
 
 class MidiBertSeq2Seq(nn.Module):
-    def __init__(self, config, e2w, w2e):
+    def __init__(self, config_en, config_de, ckpt, e2w, w2e):
         super().__init__()
 
+        encoder_model = BertModel(config_en)
+        decoder_model = BertModel(config_de)
+        config = EncoderDecoderConfig.from_encoder_decoder_configs(config_en, config_de)
+        checkpoint = torch.load(f"./result/pretrain/{ckpt}/model_best.ckpt")
+
+        for key in list(checkpoint["state_dict"].keys()):
+            # rename the states in checkpoint
+            checkpoint["state_dict"][key.replace("bert.", "")] = checkpoint[
+                "state_dict"
+            ].pop(key)
+        encoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
+        decoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
         self.hidden_size = config.encoder.hidden_size
         self.bert2bertConfig = config
-        self.bert2bert = EncoderDecoderModel(config=config)
-        # We are not directly using EncoderDecoder Class in huggingface since
+        encoder_model.save_pretrained("./s2s_encoder_model/")
+        decoder_model.save_pretrained("./s2s_decoder_model/")
+        self.bert2bert = EncoderDecoderModel.from_encoder_decoder_pretrained(
+            "./s2s_encoder_model/", "./s2s_decoder_model/", config=config
+        )
 
         # token types: [Bar, Position, Pitch, Duration]
         self.n_tokens = []  # [3,18,88,66]
