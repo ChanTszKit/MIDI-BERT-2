@@ -4,7 +4,8 @@ import random
 
 import torch
 import torch.nn as nn
-from transformers import BertModel
+from transformers import BertModel, EncoderDecoderModel, EncoderDecoderConfig
+
 
 class Embeddings(nn.Module):
     def __init__(self, n_token, d_model):
@@ -20,14 +21,14 @@ class Embeddings(nn.Module):
 class MidiBert(nn.Module):
     def __init__(self, bertConfig, e2w, w2e):
         super().__init__()
-        
+
         self.bert = BertModel(bertConfig)
         bertConfig.d_model = bertConfig.hidden_size
         self.hidden_size = bertConfig.hidden_size
         self.bertConfig = bertConfig
 
         # token types: [Bar, Position, Pitch, Duration]
-        self.n_tokens = []      # [3,18,88,66]
+        self.n_tokens = []  # [3,18,88,66]
         for key in e2w:
             self.n_tokens.append(len(e2w[key]))
         self.emb_sizes = [256, 256, 256, 256]
@@ -35,19 +36,22 @@ class MidiBert(nn.Module):
         self.w2e = w2e
 
         # for deciding whether the current input_ids is a <PAD> token
-        self.bar_pad_word = self.e2w['Bar']['Bar <PAD>']        
-        self.mask_word_np = np.array([self.e2w[etype]['%s <MASK>' % etype] for etype in self.e2w], dtype=np.long)
-        self.pad_word_np = np.array([self.e2w[etype]['%s <PAD>' % etype] for etype in self.e2w], dtype=np.long)
-        
+        self.bar_pad_word = self.e2w["Bar"]["Bar <PAD>"]
+        self.mask_word_np = np.array(
+            [self.e2w[etype]["%s <MASK>" % etype] for etype in self.e2w], dtype=np.long
+        )
+        self.pad_word_np = np.array(
+            [self.e2w[etype]["%s <PAD>" % etype] for etype in self.e2w], dtype=np.long
+        )
+
         # word_emb: embeddings to change token ids into embeddings
         self.word_emb = []
         for i, key in enumerate(self.e2w):
             self.word_emb.append(Embeddings(self.n_tokens[i], self.emb_sizes[i]))
         self.word_emb = nn.ModuleList(self.word_emb)
 
-        # linear layer to merge embeddings from different token types 
+        # linear layer to merge embeddings from different token types
         self.in_linear = nn.Linear(np.sum(self.emb_sizes), bertConfig.d_model)
-
 
     def forward(self, input_ids, attn_mask=None, output_hidden_states=True):
         # convert input_ids into embeddings and merge them through linear layer
@@ -56,28 +60,58 @@ class MidiBert(nn.Module):
             embs.append(self.word_emb[i](input_ids[..., i]))
         embs = torch.cat([*embs], dim=-1)
         emb_linear = self.in_linear(embs)
-        # feed to bert 
-        y = self.bert(inputs_embeds=emb_linear, attention_mask=attn_mask, output_hidden_states=output_hidden_states)
-        #y = y.last_hidden_state         # (batch_size, seq_len, 768)
+        # feed to bert
+        y = self.bert(
+            inputs_embeds=emb_linear,
+            attention_mask=attn_mask,
+            output_hidden_states=output_hidden_states,
+        )
+        # y = y.last_hidden_state         # (batch_size, seq_len, 768)
         return y
-    
+
     def get_rand_tok(self):
-        c1,c2,c3,c4 = self.n_tokens[0], self.n_tokens[1], self.n_tokens[2], self.n_tokens[3]
-        return np.array([random.choice(range(c1)),random.choice(range(c2)),random.choice(range(c3)),random.choice(range(c4))])
+        c1, c2, c3, c4 = (
+            self.n_tokens[0],
+            self.n_tokens[1],
+            self.n_tokens[2],
+            self.n_tokens[3],
+        )
+        return np.array(
+            [
+                random.choice(range(c1)),
+                random.choice(range(c2)),
+                random.choice(range(c3)),
+                random.choice(range(c4)),
+            ]
+        )
 
 
 class MidiBertSeq2Seq(nn.Module):
-    def __init__(self, bertConfig_en,bertConfig_de, e2w, w2e):
+    def __init__(self, config_en, config_de, ckpt, e2w, w2e):
         super().__init__()
-        
-        self.bert_en = BertModel(bertConfig_en)
-        bertConfig_en.d_model = bertConfig_en.hidden_size
-        self.hidden_size = bertConfig_en.hidden_size
-        self.bertConfig = bertConfig_en
-        self.bert_de = BertModel(bertConfig_de)
+
+        encoder_model = BertModel(config_en)
+        decoder_model = BertModel(config_de)
+        config = EncoderDecoderConfig.from_encoder_decoder_configs(config_en, config_de)
+        checkpoint = torch.load(f"./result/pretrain/{ckpt}/model_best.ckpt")
+
+        for key in list(checkpoint["state_dict"].keys()):
+            # rename the states in checkpoint
+            checkpoint["state_dict"][key.replace("bert.", "")] = checkpoint[
+                "state_dict"
+            ].pop(key)
+        encoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
+        decoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
+        self.hidden_size = config.encoder.hidden_size
+        self.bert2bertConfig = config
+        encoder_model.save_pretrained("./s2s_encoder_model/")
+        decoder_model.save_pretrained("./s2s_decoder_model/")
+        self.bert2bert = EncoderDecoderModel.from_encoder_decoder_pretrained(
+            "./s2s_encoder_model/", "./s2s_decoder_model/", config=config
+        )
 
         # token types: [Bar, Position, Pitch, Duration]
-        self.n_tokens = []      # [3,18,88,66]
+        self.n_tokens = []  # [3,18,88,66]
         for key in e2w:
             self.n_tokens.append(len(e2w[key]))
         self.emb_sizes = [256, 256, 256, 256]
@@ -85,21 +119,32 @@ class MidiBertSeq2Seq(nn.Module):
         self.w2e = w2e
 
         # for deciding whether the current input_ids is a <PAD> token
-        self.bar_pad_word = self.e2w['Bar']['Bar <PAD>']        
-        self.mask_word_np = np.array([self.e2w[etype]['%s <MASK>' % etype] for etype in self.e2w], dtype=np.long)
-        self.pad_word_np = np.array([self.e2w[etype]['%s <PAD>' % etype] for etype in self.e2w], dtype=np.long)
-        
+        self.bar_pad_word = self.e2w["Bar"]["Bar <PAD>"]
+        self.mask_word_np = np.array(
+            [self.e2w[etype]["%s <MASK>" % etype] for etype in self.e2w], dtype=np.long
+        )
+        self.pad_word_np = np.array(
+            [self.e2w[etype]["%s <PAD>" % etype] for etype in self.e2w], dtype=np.long
+        )
+        # TODO: add other token types?
+
         # word_emb: embeddings to change token ids into embeddings
         self.word_emb = []
         for i, key in enumerate(self.e2w):
             self.word_emb.append(Embeddings(self.n_tokens[i], self.emb_sizes[i]))
         self.word_emb = nn.ModuleList(self.word_emb)
 
-        # linear layer to merge embeddings from different token types 
-        self.in_linear = nn.Linear(np.sum(self.emb_sizes), bertConfig_en.d_model)
+        # linear layer to merge embeddings from different token types
+        self.in_linear = nn.Linear(np.sum(self.emb_sizes), self.hidden_size)
 
-
-    def forward(self, input_ids,decoder_ids, attn_mask=None, output_hidden_states=True):
+    def forward(
+        self,
+        input_ids,
+        decoder_ids,
+        encoder_attn_mask=None,
+        decoder_attn_mask=None,
+        output_hidden_states=True,
+    ):
         # convert input_ids into embeddings and merge them through linear layer
         embs = []
         for i, key in enumerate(self.e2w):
@@ -107,18 +152,35 @@ class MidiBertSeq2Seq(nn.Module):
         embs = torch.cat([*embs], dim=-1)
         emb_linear = self.in_linear(embs)
 
+        # Assume the decoder_ids are already of the correct length
         embs2 = []
         for i, key in enumerate(self.e2w):
             embs2.append(self.word_emb[i](decoder_ids[..., i]))
-        embs2 = torch.cat([*embs], dim=-1)
+        embs2 = torch.cat([*embs2], dim=-1)
         emb2_linear = self.in_linear(embs2)
 
-        # feed to bert 
-        y = self.bert_en(inputs_embeds=emb_linear, attention_mask=attn_mask, output_hidden_states=output_hidden_states)
-        z = self.bert_de(input_embeds=emb2_linear,encoder_hidden_states=y,output_hidden_states=output_hidden_states)
-        #y = y.last_hidden_state         # (batch_size, seq_len, 768)
-        return z
-    
+        # feed to bert
+        y = self.bert2bert(
+            inputs_embeds=emb_linear,
+            decoder_inputs_embeds=emb2_linear,
+            attention_mask=encoder_attn_mask,
+            decoder_attention_mask=decoder_attn_mask,
+            output_hidden_states=output_hidden_states,
+        )
+        return y
+
     def get_rand_tok(self):
-        c1,c2,c3,c4 = self.n_tokens[0], self.n_tokens[1], self.n_tokens[2], self.n_tokens[3]
-        return np.array([random.choice(range(c1)),random.choice(range(c2)),random.choice(range(c3)),random.choice(range(c4))])
+        c1, c2, c3, c4 = (
+            self.n_tokens[0],
+            self.n_tokens[1],
+            self.n_tokens[2],
+            self.n_tokens[3],
+        )
+        return np.array(
+            [
+                random.choice(range(c1)),
+                random.choice(range(c2)),
+                random.choice(range(c3)),
+                random.choice(range(c4)),
+            ]
+        )
