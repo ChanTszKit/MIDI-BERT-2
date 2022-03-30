@@ -33,7 +33,7 @@ def get_args():
         nargs="+",
         default=["pop909", "composer", "pop1k7", "ASAP", "emopia"],
     )
-    parser.add_argument("--checkpoint", type=str, default="continue2")
+    parser.add_argument("--checkpoint", type=str, default="continue3")
     ### parameter setting ###
     parser.add_argument("--num_workers", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=6)
