@@ -11,6 +11,7 @@ from model import MidiBert, MidiBertSeq2Seq
 from trainer import BERTTrainer, BERTSeq2SeqTrainer
 from midi_dataset import MidiDataset, Seq2SeqDataset
 import logging
+from sklearn.model_selection import train_test_split
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -71,12 +72,14 @@ def load_data(datasets, mode="bert"):
     root = "../../data/CP"
 
     if mode == "seq2seq":
-        X_train = np.load(os.path.join(root, "testcase.npy"), allow_pickle=True)
-        Y_train = np.load(os.path.join(root, "testcase.npy"), allow_pickle=True)
-        X_test = np.load(os.path.join(root, "testcase.npy"), allow_pickle=True)
-        Y_test = np.load(os.path.join(root, "testcase.npy"), allow_pickle=True)
-        return X_train, Y_train, X_test, Y_test
-
+        X = np.load(os.path.join(root, "skyline.npy"), allow_pickle=True)
+        y = np.load(os.path.join(root, "skyline_ans.npy"), allow_pickle=True)
+        logger.info("shape of input {} {}".format(X.shape, y.shape))
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.15, random_state=42
+        )
+        logger.info("shape of train input {} {}".format(X_train.shape, y_train.shape))
+        return X_train, y_train, X_test, y_test
     for dataset in datasets:
         if dataset in {"pop909", "composer", "emopia"}:
             X_train = np.load(
@@ -207,7 +210,8 @@ def main():
     for epoch in range(args.epochs):
         if bad_cnt >= 30:
             logger.info("valid acc not improving for 30 epochs")
-            break
+            logger.info("Continuing anyway.")
+            bad_cnt = 0
         train_loss, train_acc = trainer.train()
         valid_loss, valid_acc = trainer.valid()
 

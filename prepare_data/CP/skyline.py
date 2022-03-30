@@ -207,6 +207,7 @@ class Skyline:
             full_tokens.append(temp_full)
             temp_skyline = []
             temp_full = []
+        print(max_token_len)
         skyline_tokens = np.array(skyline_tokens)
         full_tokens = np.array(full_tokens)
         return skyline_tokens, full_tokens

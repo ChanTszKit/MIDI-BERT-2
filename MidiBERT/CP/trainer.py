@@ -12,6 +12,12 @@ import copy
 
 from model import MidiBert, MidiBertSeq2Seq
 from modelLM import MidiBertLM, MidiBertSeq2SeqComplete
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 class BERTTrainer:
@@ -251,11 +257,9 @@ class BERTSeq2SeqTrainer:
             input_ids = copy.deepcopy(ori_seq_batch_x)
             target = copy.deepcopy(ori_seq_batch_y)
             loss_mask = torch.zeros(batch, max_seq_len)
-            decoder_input_ids = target  # [:, :-1, :]
-            decoder_target = target  # [:, 1:, :]
+            decoder_input_ids = target[:, :-1, :]
+            decoder_target = target[:, 1:, :]
             decoder_target = decoder_target.type(torch.int64)
-
-            # loss_mask
 
             # avoid attend to pad word
             attn_mask_encoder = (
@@ -321,11 +325,11 @@ class BERTSeq2SeqTrainer:
 
             # acc
             accs = list(map(float, all_acc))
-            sys.stdout.write(
-                "Loss: {:06f} | loss: {:03f}, {:03f}, {:03f}, {:03f} | acc: {:03f}, {:03f}, {:03f}, {:03f} \r".format(
-                    total_loss, *losses, *accs
-                )
-            )
+            # sys.stdout.write(
+            #     "Loss: {:06f} | loss: {:03f}, {:03f}, {:03f}, {:03f} | acc: {:03f}, {:03f}, {:03f}, {:03f} \r".format(
+            #         total_loss, *losses, *accs
+            #     )
+            # )
 
             losses = list(map(float, losses))
             total_losses += total_loss.item()
