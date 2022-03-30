@@ -177,8 +177,8 @@ class CP(object):
                 ) and len(slice_ys[-1]) < max_len:
                     slice_ys[-1] = self.padding(slice_ys[-1], max_len, ans=True)
 
-                all_words = all_words + slice_words
-                all_ys = all_ys + slice_ys
+                all_words = all_words + list(slice_words)
+                all_ys = all_ys + list(slice_ys)
             except Exception as e:
                 logger.error(e)
 
