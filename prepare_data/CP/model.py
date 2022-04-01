@@ -98,6 +98,9 @@ class CP(object):
                 piano = path + "/piano.mid"
                 events, histp = self.extract_events(orch, task)
                 events2, histp = self.extract_events(piano, task)
+                if len(events2) == 0:
+                    logger.info("skipped")
+                    continue
             else:
                 events, histp = self.extract_events(path, task)
             if len(events) == 0:

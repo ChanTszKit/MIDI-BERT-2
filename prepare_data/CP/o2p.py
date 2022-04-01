@@ -81,6 +81,14 @@ class O2p:
                 if token[0] == 0:
                     current_bar += 1
                 temp = list(token)
+                temp.append(int(current_bar * 4 * tpb + token[1] * tpb / 4))  # onset
+                temp.append(
+                    int(
+                        current_bar * 4 * tpb
+                        + token[1] * tpb / 4
+                        + (token[3] + 1) * tpb / 8
+                    )
+                )  # offset
                 token_with_on_off_set.append(temp)
         total_bar_orch = current_bar + 1
         orch = self.align_token(token_with_on_off_set, total_bar_orch)
@@ -91,6 +99,14 @@ class O2p:
                 if token[0] == 0:
                     current_bar += 1
                 temp = list(token)
+                temp.append(int(current_bar * 4 * tpb + token[1] * tpb / 4))  # onset
+                temp.append(
+                    int(
+                        current_bar * 4 * tpb
+                        + token[1] * tpb / 4
+                        + (token[3] + 1) * tpb / 8
+                    )
+                )  # offset
                 token_with_on_off_set.append(temp)
         total_bar_piano = current_bar + 1  # skyline
         piano = self.align_token(token_with_on_off_set, total_bar_piano)
