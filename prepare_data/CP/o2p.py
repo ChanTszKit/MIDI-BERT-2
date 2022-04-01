@@ -93,6 +93,7 @@ class O2p:
         total_bar_orch = current_bar + 1
         orch = self.align_token(token_with_on_off_set, total_bar_orch)
         current_bar = -1
+        token_with_on_off_set = []
         for token in all_tokens_piano:
             token = np.array(token)
             if not ((token == self.PAD).all() or (token == self.EOS).all()):
