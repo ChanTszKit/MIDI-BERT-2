@@ -111,7 +111,11 @@ class O2p:
                 token_with_on_off_set.append(temp)
         total_bar_piano = current_bar + 1  # skyline
         piano = self.align_token(token_with_on_off_set, total_bar_piano)
-        assert total_bar_piano == total_bar_orch
+        try:
+            assert len(piano) == len(orch)
+        except:
+            print("error", len(piano), len(orch))
+            return [], []
 
         current_bar = 0
         max_token_len = 0
