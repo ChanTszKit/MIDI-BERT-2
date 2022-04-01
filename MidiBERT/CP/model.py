@@ -93,15 +93,16 @@ class MidiBertSeq2Seq(nn.Module):
         encoder_model = BertModel(config_en)
         decoder_model = BertModel(config_de)
         config = EncoderDecoderConfig.from_encoder_decoder_configs(config_en, config_de)
-        checkpoint = torch.load(f"./result/pretrain/{ckpt}/model_best.ckpt")
+        if ckpt != "":
+            checkpoint = torch.load(f"./result/pretrain/{ckpt}/model_best.ckpt")
 
-        for key in list(checkpoint["state_dict"].keys()):
-            # rename the states in checkpoint
-            checkpoint["state_dict"][key.replace("bert.", "")] = checkpoint[
-                "state_dict"
-            ].pop(key)
-        encoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
-        decoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
+            for key in list(checkpoint["state_dict"].keys()):
+                # rename the states in checkpoint
+                checkpoint["state_dict"][key.replace("bert.", "")] = checkpoint[
+                    "state_dict"
+                ].pop(key)
+            encoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
+            decoder_model.load_state_dict(checkpoint["state_dict"], strict=False)
         self.hidden_size = config.encoder.hidden_size
         self.bert2bertConfig = config
         encoder_model.save_pretrained("./s2s_encoder_model/")
@@ -167,6 +168,7 @@ class MidiBertSeq2Seq(nn.Module):
             decoder_attention_mask=decoder_attn_mask,
             output_hidden_states=output_hidden_states,
         )
+
         return y
 
     def get_rand_tok(self):

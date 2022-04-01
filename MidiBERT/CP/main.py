@@ -72,8 +72,9 @@ def load_data(datasets, mode="bert"):
     root = "../../data/CP"
 
     if mode == "seq2seq":
-        X = np.load(os.path.join(root, "skyline.npy"), allow_pickle=True)
-        y = np.load(os.path.join(root, "skyline_ans.npy"), allow_pickle=True)
+
+        X = np.load(os.path.join(root, f"{datasets}.npy"), allow_pickle=True)
+        y = np.load(os.path.join(root, f"{datasets}_ans.npy"), allow_pickle=True)
         logger.info("shape of input {} {}".format(X.shape, y.shape))
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.15, random_state=42
