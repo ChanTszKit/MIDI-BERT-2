@@ -323,6 +323,13 @@ class BERTSeq2SeqTrainer:
                 clip_grad_norm_(self.model.parameters(), 3.0)
                 self.optim.step()
 
+            # delete stuff
+            del ori_seq_batch_x
+            del ori_seq_batch_y
+            del attn_mask_encoder
+            del attn_mask_decoder
+            del loss_mask
+            torch.cuda.empty_cache()
             # acc
             accs = list(map(float, all_acc))
             # sys.stdout.write(
