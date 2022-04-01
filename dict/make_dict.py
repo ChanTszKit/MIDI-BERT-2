@@ -1,7 +1,7 @@
 import pickle
 
-event2word = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}}
-word2event = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}}
+event2word = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}}
+word2event = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}}
 
 
 def special_tok(cnt, cls):
@@ -72,9 +72,18 @@ for i in range(64):
 
 special_tok(cnt, cls)
 
+# Program
+cnt, cls = 0, "Program"
+for i in range(96):  # ignore sound effects and ethnic instruments
+    event2word[cls][f"Program {i}"] = cnt
+    word2event[cls][cnt] = f"Program {i}"
+    cnt += 1
+
+special_tok(cnt, cls)
+
 print(event2word)
 print(word2event)
 t = (event2word, word2event)
 
-with open("CP_skyline.pkl", "wb") as f:
+with open("CP_program.pkl", "wb") as f:
     pickle.dump(t, f)
