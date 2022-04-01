@@ -136,8 +136,8 @@ class O2p:
             )  # at least it shld has the ABS token
 
             temp_piano.append(self.EOS)
-            temp_orch = np.array(temp_orch).reshape(-1, 4)
-            temp_piano = np.array(temp_piano).reshape(-1, 4)
+            temp_orch = np.array(temp_orch).reshape(-1, 5)
+            temp_piano = np.array(temp_piano).reshape(-1, 5)
 
             while len(temp_orch) < self.piano_max_len:  # add PAD
                 temp_orch = np.vstack((temp_orch, self.PAD))
