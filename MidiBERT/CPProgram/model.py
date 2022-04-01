@@ -31,7 +31,7 @@ class MidiBert(nn.Module):
         self.n_tokens = []  # [3,18,88,66]
         for key in e2w:
             self.n_tokens.append(len(e2w[key]))
-        self.emb_sizes = [256, 256, 256, 256]
+        self.emb_sizes = [256, 256, 256, 256, 256]
         self.e2w = e2w
         self.w2e = w2e
 
