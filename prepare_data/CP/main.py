@@ -6,6 +6,7 @@ import argparse
 import numpy as np
 from model import *
 from sklearn.model_selection import train_test_split
+import random
 
 
 def get_args():
@@ -180,7 +181,10 @@ def main():
             extract(X_val, args, model, "valid")
             extract(X_test, args, model, "test")
         elif args.task == "skyline":
-            files = glob.glob(f"{args.input_dir}/*.mid")
+            files = glob.glob(f"{args.input_dir}/PianoMidi_nicely_formatted/*.mid")
+            files += random.sample(
+                glob.glob(f"{args.input_dir}/GiantMIDI_piano/midis_v1.1/*.mid"), 800
+            )
             extract(files, args, model)
         elif args.task == "o2p":
             extract(o2p_files, args, model)
