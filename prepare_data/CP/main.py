@@ -25,6 +25,7 @@ def get_args():
             "reduction",
             "custom",
             "skyline",
+            "o2p",
         ],
     )
 
@@ -83,7 +84,7 @@ def extract(files, args, model, mode=""):
         output_file = os.path.join(args.output_dir, f"custom_reduction_{mode}.npy")
     elif args.task == "custom":
         output_file = os.path.join(args.output_dir, f"{args.name}.npy")
-    elif args.task == "skyline":
+    elif args.task == "skyline" or args.task == "o2p":
         output_file = os.path.join(args.output_dir, f"{args.name}.npy")
     elif args.input_dir != "":
         if args.name == "":
@@ -106,7 +107,7 @@ def extract(files, args, model, mode=""):
             ans_file = os.path.join(args.output_dir, f"{dataset}_{mode}_ans.npy")
         elif args.task == "reduction":
             ans_file = os.path.join(args.output_dir, f"custom_reduction_{mode}_ans.npy")
-        elif args.task == "skyline":
+        elif args.task == "skyline" or args.task == "o2p":
             ans_file = os.path.join(args.output_dir, f"{args.name}_ans.npy")
 
         np.save(ans_file, ans)
@@ -148,6 +149,12 @@ def main():
             print("please specify input_dir")
         else:
             files = glob.glob(f"{args.input_dir}/*.mid")
+    elif args.task == "o2p":
+        o2p_files = [
+            root + "/" + d
+            for root, dir, files in os.walk(f"{args.input_dir}/LOP_piano&Orchestra_RAW")
+            for d in dir
+        ]
     elif args.input_dir:
         files = glob.glob(f"{args.input_dir}/GiantMIDI_piano/midis_v1.1/*.mid")
 
@@ -175,6 +182,8 @@ def main():
         elif args.task == "skyline":
             files = glob.glob(f"{args.input_dir}/*.mid")
             extract(files, args, model)
+        elif args.task == "o2p":
+            extract(o2p_files, args, model)
         else:
             if args.task == "custom":
                 files = glob.glob(f"{args.input_dir}/*.mid")

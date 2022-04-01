@@ -4,6 +4,7 @@ import utils
 from tqdm import tqdm
 import logging
 from skyline import Skyline
+from o2p import O2p
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -85,18 +86,25 @@ class CP(object):
         all_words, all_ys = [], []
         if task == "skyline":
             skyline = Skyline(self.dict)
+        if task == "o2p":
+            o2p = O2p(self.dict)
 
         for path in midi_paths:
             # extract events
             try:
                 logger.info(path)
-                events, histp = self.extract_events(path, task)
+                if task == "o2p":
+                    orch = path + "/orchestra.mid"
+                    piano = path + "/piano.mid"
+                    events, histp = self.extract_events(orch, task)
+                    events2, histp = self.extract_events(piano, task)
+                else:
+                    events, histp = self.extract_events(path, task)
                 if len(events) == 0:
                     continue
                 if task == "reduction" and histp is None:
                     print("skipped_nop")
                     continue
-                # print(histp)
                 # events to words
                 words, ys = [], []
                 i = 0
@@ -123,6 +131,21 @@ class CP(object):
                             ys.append(1)
                         else:
                             ys.append(2)
+                words2 = []
+                if task == "o2p":
+                    for note_tuple in events2:
+                        nts, to_class = [], -1
+                        pitch, interval = None, None
+                        for e in note_tuple:
+                            if e.name == "genLabel":
+                                interval = e.value
+                                continue
+                            e_text = "{} {}".format(e.name, e.value)
+                            nts.append(self.event2word[e.name][e_text])
+                            if e.name == "Pitch":
+                                to_class = e.Type
+                                pitch = e.value
+                        words2.append(nts)
 
                 if task == "custom":
                     slice_words = []
@@ -144,6 +167,8 @@ class CP(object):
                 # slice to chunks so that max length = max_len (default: 512)
                 if task == "skyline":
                     slice_words, slice_ys = skyline.generate(words)
+                elif task == "o2p":
+                    slice_words, slice_ys = o2p.generate(words, words2)
                 else:
                     slice_words, slice_ys = [], []
                     for i in range(0, len(words), max_len):
