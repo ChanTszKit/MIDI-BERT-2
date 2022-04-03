@@ -152,7 +152,7 @@ class O2p:
             orch_tokens.append(temp_orch)
             piano_tokens.append(temp_piano)
             temp_orch = []
-            temp_piano = []
+            temp_piano = [self.BOS]
         orch_tokens = np.array(orch_tokens)
         piano_tokens = np.array(piano_tokens)
         return orch_tokens, piano_tokens
