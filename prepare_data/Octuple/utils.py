@@ -115,7 +115,7 @@ def read_items(file_path, is_reduction=False, is_piano=False):
         notes = midi_obj.instruments[i].notes
         notes.sort(key=lambda x: (x.start, x.pitch))
         program = midi_obj.instruments[i].program
-        program = 0 if program > 95 else program
+        program = 0 if program > 95 or is_piano else program
         for note in notes:
             if note.pitch < 22 or note.pitch > 107:
                 continue

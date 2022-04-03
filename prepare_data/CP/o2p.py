@@ -2,6 +2,12 @@ import numpy as np
 from miditoolkit.midi import parser as mid_parser
 from miditoolkit.midi import containers as ct
 import pickle
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 class O2p:

@@ -54,13 +54,13 @@ class CP(object):
             self.event2word[etype]["%s <EOS>" % etype] for etype in self.event2word
         ]
 
-    def extract_events(self, input_path, task):
+    def extract_events(self, input_path, task,is_piano=False):
         if task == "reduction":
             note_items, tempo_items, pianohist = utils.read_items(
                 input_path, is_reduction=True
             )
         else:
-            note_items, tempo_items = utils.read_items(input_path)
+            note_items, tempo_items = utils.read_items(input_path,is_piano=is_piano)
             pianohist = None
         if len(note_items) == 0:
             return [], None
@@ -97,7 +97,7 @@ class CP(object):
                     orch = path + "/orchestra.mid"
                     piano = path + "/piano.mid"
                     events, histp = self.extract_events(orch, task)
-                    events2, histp = self.extract_events(piano, task)
+                    events2, histp = self.extract_events(piano, task, True)
                     if len(events2) == 0:
                         logger.info("skipped")
                         continue

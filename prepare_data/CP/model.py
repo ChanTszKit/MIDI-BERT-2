@@ -171,6 +171,11 @@ class CP(object):
                 if task == "skyline":
                     slice_words, slice_ys = skyline.generate(words)
                 elif task == "o2p":
+                    try:
+                        assert words[0][0] == 0
+                        assert words2[0][0] == 0
+                    except:
+                        print("CRAZY!!!")
                     slice_words, slice_ys = o2p.generate(words, words2)
                 else:
                     slice_words, slice_ys = [], []

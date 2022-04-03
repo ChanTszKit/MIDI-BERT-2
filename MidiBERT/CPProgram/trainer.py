@@ -294,7 +294,7 @@ class BERTSeq2SeqTrainer:
 
             # accuracy
             all_acc = []
-            for i in range(4):
+            for i in range(5):
                 acc = torch.sum(
                     (decoder_target[:, :, i] == outputs[:, :, i]).float() * loss_mask
                 )
