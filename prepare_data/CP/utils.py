@@ -127,7 +127,7 @@ def read_items(file_path, is_reduction=False):
                 )
             )
 
-    note_items.sort(key=lambda x: x.start)
+    note_items.sort(key=lambda x: (x.start, x.pitch))
 
     # tempo
     tempo_items = []
