@@ -26,8 +26,8 @@ class O2p:
         self.ABS = np.array(
             [self.event2word[etype]["%s <ABS>" % etype] for etype in self.event2word]
         )
-        self.orch_max_len = 512  # parameters
-        self.piano_max_len = 512
+        self.orch_max_len = 128  # parameters
+        self.piano_max_len = 128
 
     def align_token(self, notes, length):  # align the tokens bar by bar
         out = []
