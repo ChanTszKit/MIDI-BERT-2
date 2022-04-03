@@ -69,7 +69,7 @@ def get_args():
 
 def load_data(datasets, mode="bert"):
     to_concat = []
-    root = "../../data/CP"
+    root = "../../data/CPProgram"
 
     if mode == "seq2seq":
 
