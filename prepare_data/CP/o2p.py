@@ -96,6 +96,9 @@ class O2p:
                     )
                 )  # offset
                 token_with_on_off_set.append(temp)
+        token_with_on_off_set = sorted(
+            token_with_on_off_set, key=lambda x: (x[4], x[0], x[2])
+        )
         total_bar_orch = current_bar + 1
         orch = self.align_token(token_with_on_off_set, total_bar_orch)
         current_bar = -1
@@ -115,6 +118,9 @@ class O2p:
                     )
                 )  # offset
                 token_with_on_off_set.append(temp)
+        token_with_on_off_set = sorted(
+            token_with_on_off_set, key=lambda x: (x[4], x[0], x[2])
+        )
         total_bar_piano = current_bar + 1  # skyline
         piano = self.align_token(token_with_on_off_set, total_bar_piano)
         try:

@@ -166,6 +166,9 @@ class Skyline:
                 )  # offset
                 token_with_on_off_set.append(temp)
         total_bar = current_bar + 1  # skyline
+        token_with_on_off_set = sorted(
+            token_with_on_off_set, key=lambda x: (x[4], x[0], x[2])
+        )
         org = self.align_token(token_with_on_off_set, total_bar)
         sl = self.skyline(token_with_on_off_set) + self.skyline_reverse(
             token_with_on_off_set
@@ -173,7 +176,7 @@ class Skyline:
         sl = [tuple(x) for x in sl]  # remove duplication
         sl = list(dict.fromkeys(sl))
         sl = [list(x) for x in sl]
-        sl = sorted(sl, key=lambda x: (x[4], x[0]))  # sort by onset & bar(new)
+        sl = sorted(sl, key=lambda x: (x[4], x[0], x[2]))  # sort by onset & bar(new)
         sl = self.align_token(sl, total_bar)
 
         current_bar = 0

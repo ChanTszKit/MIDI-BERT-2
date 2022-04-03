@@ -91,6 +91,9 @@ class O2p:
                 )  # offset
                 token_with_on_off_set.append(temp)
         total_bar_orch = current_bar + 1
+        token_with_on_off_set = sorted(
+            token_with_on_off_set, key=lambda x: (x[5], x[0], x[2])
+        )
         orch = self.align_token(token_with_on_off_set, total_bar_orch)
         current_bar = -1
         token_with_on_off_set = []
@@ -110,6 +113,9 @@ class O2p:
                 )  # offset
                 token_with_on_off_set.append(temp)
         total_bar_piano = current_bar + 1  # skyline
+        token_with_on_off_set = sorted(
+            token_with_on_off_set, key=lambda x: (x[5], x[0], x[2])
+        )
         piano = self.align_token(token_with_on_off_set, total_bar_piano)
         try:
             assert len(piano) == len(orch)
