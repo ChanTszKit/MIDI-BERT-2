@@ -50,9 +50,9 @@ class CP(object):
         self.pad_word = [
             self.event2word[etype]["%s <PAD>" % etype] for etype in self.event2word
         ]
-        self.EOS = [
-            self.event2word[etype]["%s <EOS>" % etype] for etype in self.event2word
-        ]
+        # self.EOS = [
+        #     self.event2word[etype]["%s <EOS>" % etype] for etype in self.event2word
+        # ]
 
     def extract_events(self, input_path, task):
         if task == "reduction":
