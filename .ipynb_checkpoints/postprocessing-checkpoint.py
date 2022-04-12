@@ -545,13 +545,15 @@ def drop_discrete_note(notes,tick_per_beat,discrete_note_threshold):
     return notes
 
 
-def postprocess(inpath,outpath,merge_threshold=0.00005,discrete_note_threshold=0.005):
+def postprocess(inpath,outpath,merge_threshold=0.00005,discrete_note_threshold=0.0005,merge=False):
     path=inpath
     notes,tick_per_beat = read_midi(path)
     org_notes=len(notes)
     #print(f'before post-processing {org_notes} notes')
     notes = trim_long_notes(notes, tick_per_beat)
     notes,centers_per_beat,range_per_beat = octave_transpose(notes, tick_per_beat,3,6,mode='normal')
+    if merge:
+        notes = merge_discrete_note(notes,tick_per_beat,merge_threshold)
     notes = drop_discrete_note(notes,tick_per_beat,discrete_note_threshold)
     notes = doubling_simplification(notes,centers_per_beat, tick_per_beat)
     cur_notes=len(notes)
@@ -567,6 +569,8 @@ def postprocess(inpath,outpath,merge_threshold=0.00005,discrete_note_threshold=0
         #print(f'before post-processing {org_notes} notes')
         notes = trim_long_notes(notes, tick_per_beat)
         notes,centers_per_beat,range_per_beat = octave_transpose(notes, tick_per_beat,1,10,range_per_beat,mode='centroid')
+        if merge:
+            notes = merge_discrete_note(notes,tick_per_beat,merge_threshold)
         notes = drop_discrete_note(notes,tick_per_beat,discrete_note_threshold)
         notes = doubling_simplification(notes,centers_per_beat, tick_per_beat)
         cur_notes=len(notes)
