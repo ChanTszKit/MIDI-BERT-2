@@ -84,7 +84,7 @@ def extract(files, args, model, mode=""):
     if args.task == "reduction":
         output_file = os.path.join(args.output_dir, f"custom_reduction_{mode}.npy")
     elif args.task == "custom":
-        output_file = os.path.join(args.output_dir, f"{args.name}.npy")
+        output_file = os.path.join(args.output_dir, f"custom_{args.name}.npy")
     elif args.task == "skyline" or args.task == "o2p":
         output_file = os.path.join(args.output_dir, f"{args.name}.npy")
     elif args.input_dir != "":

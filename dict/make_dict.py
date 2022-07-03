@@ -1,7 +1,7 @@
 import pickle
 
-event2word = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}}
-word2event = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}}
+event2word = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}, "Time Signature": {}}
+word2event = {"Bar": {}, "Position": {}, "Pitch": {}, "Duration": {}, "Program": {}, "Time Signature": {}}
 
 
 def special_tok(cnt, cls):
@@ -45,12 +45,15 @@ word2event[cls][cnt] = "Bar Continue"
 cnt += 1
 special_tok(cnt, cls)
 
+##############################################
 # Position
+# 16 beats -> 24 beats
 cnt, cls = 0, "Position"
-for i in range(1, 17):
-    event2word[cls][f"Position {i}/16"] = cnt
-    word2event[cls][cnt] = f"Position {i}/16"
+for i in range(1, 25):
+    event2word[cls][f"Position {i}/24"] = cnt
+    word2event[cls][cnt] = f"Position {i}/24"
     cnt += 1
+##############################################
 
 special_tok(cnt, cls)
 
@@ -81,8 +84,26 @@ for i in range(96):  # ignore sound effects and ethnic instruments
 
 special_tok(cnt, cls)
 
-print(event2word)
-print(word2event)
+####################################################
+# Customized Tokens
+
+## 1. Instrument === Program
+
+## 2. Simple Time Signature
+supported_time_signature = ["22", "24", "34", "44"]
+
+cnt, cls = 0, "Time Signature"
+for i in supported_time_signature:
+    event2word[cls][f"Time Signature {i}"] = cnt
+    word2event[cls][cnt] = f"Time Signature {i}"
+    cnt += 1
+
+special_tok(cnt, cls)
+
+####################################################
+
+# print(event2word)
+# print(word2event)
 t = (event2word, word2event)
 
 with open("CP_program.pkl", "wb") as f:

@@ -6,6 +6,8 @@ import logging
 from skyline import Skyline
 from o2p import O2p
 
+import miditoolkit
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -29,7 +31,6 @@ Emotion = {
     "Q3": 2,
     "Q4": 3,
 }
-
 
 def find_intersect(start, end, intervals):
     def is_overlapping(x1, x2, y1, y2):
@@ -62,6 +63,16 @@ class CP(object):
         else:
             note_items, tempo_items = utils.read_items(input_path)
             pianohist = None
+        ############################################################
+        if task == "custom":
+            midi_obj = miditoolkit.midi.parser.MidiFile(input_path)
+            # Add 'Program' to each raw token
+            for i in note_items:
+                i.Program = utils.Type2Program(midi_obj, i.Type)
+            # Add 'TimeSignature' to each raw token
+            for i in note_items:
+                i.TimeSignature = utils.raw_time_signature(midi_obj, i.start)
+        ############################################################
         if len(note_items) == 0:
             return [], None
         note_items = utils.quantize_items(note_items)
@@ -215,6 +226,7 @@ class CP(object):
             except Exception as e:
                 logger.error(e)
 
+        print(all_words)
         all_words = np.array(all_words).astype(np.int64)
         all_ys = np.array(all_ys).astype(np.int64)
 

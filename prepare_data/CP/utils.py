@@ -11,6 +11,8 @@ DEFAULT_FRACTION = 16
 DEFAULT_DURATION_BINS = np.arange(60, 3841, 60, dtype=int)
 DEFAULT_TEMPO_INTERVALS = [range(30, 90), range(90, 150), range(150, 210)]
 
+MODIFIED_FRACTION = 24
+
 # parameters for output
 DEFAULT_RESOLUTION = 480
 
@@ -24,10 +26,12 @@ class Item(object):
         self.pitch = pitch
         self.Type = Type
         self.shift = shift
+        self.Program = -1
+        self.TimeSignature = "00"
 
     def __repr__(self):
-        return "Item(name={}, start={}, end={}, velocity={}, pitch={}, Type={})".format(
-            self.name, self.start, self.end, self.velocity, self.pitch, self.Type
+        return "Item(name={}, start={}, end={}, velocity={}, pitch={}, Type={}, Program={}, Time Signature={})".format(
+            self.name, self.start, self.end, self.velocity, self.pitch, self.Type, self.Program, self.TimeSignature
         )
 
 
@@ -231,13 +235,21 @@ def item2event(groups, task):
             )
 
             # Position
-            flags = np.linspace(bar_st, bar_et, DEFAULT_FRACTION, endpoint=False)
+            ######################################################################
+            if task != "custom":
+                flags = np.linspace(bar_st, bar_et, DEFAULT_FRACTION, endpoint=False)
+                total_fraction = DEFAULT_FRACTION
+            else: # task == "custom
+                # Modify a bar from 16 beats to 24 beats
+                flags = np.linspace(bar_st, bar_et, MODIFIED_FRACTION, endpoint=False)
+                total_fraction = MODIFIED_FRACTION 
+            ######################################################################
             index = np.argmin(abs(flags - item.start))
             note_tuple.append(
                 Event(
                     name="Position",
                     time=item.start,
-                    value="{}/{}".format(index + 1, DEFAULT_FRACTION),
+                    value="{}/{}".format(index + 1, total_fraction),
                     text="{}".format(item.start),
                     Type=-1,
                 )
@@ -278,6 +290,31 @@ def item2event(groups, task):
                 )
             )
 
+            ######################################################################
+            if task == "custom":
+                # Program
+                note_tuple.append(
+                    Event(
+                        name="Program",
+                        time=item.start,
+                        value=item.Program,
+                        text="{}".format(item.Program),
+                        Type=-1,
+                    )
+                )
+                
+                # Time Signature
+                note_tuple.append(
+                    Event(
+                        name="Time Signature",
+                        time=item.start,
+                        value=item.TimeSignature,
+                        text="{}".format(item.TimeSignature),
+                        Type=-1,
+                    )
+                )
+            ######################################################################
+            
             if task == "reduction":
                 note_tuple.append(
                     Event(
@@ -317,3 +354,55 @@ def group_items(items, max_time, ticks_per_bar=DEFAULT_RESOLUTION * 4):
         overall = [db1] + insiders + [db2]
         groups.append(overall)
     return groups
+
+########################################################################
+def Type2Program(midi_obj, channel):
+    '''Get Program Change Number from the instrument name at a specified channel
+    
+    Parameters:
+        midi_obj (MidiFile): from miditoolkit.midi.parser.MidiFile
+        channel (int): the index of the channel, 0-based
+        
+    Returns:
+        int: Program Change Number, 0-based
+    
+    '''
+    instrument = midi_obj.instruments[channel]
+    
+    # Assume Acoustic Grand Piano only
+    return 0
+    
+    if instrument.name == "piano": # Acoustic Grand Piano
+        return 0
+    
+    # TODO: support other program change number
+    return -1
+
+def raw_time_signature(midi_obj, time):
+    '''Get Time Signature at a specified time
+
+    Parameters:
+        midi_obj (MidiFile): from miditoolkit.midi.parser.MidiFile
+        time (int): the acquired time
+        
+    Returns:
+        str: the Time Signature at that time
+    
+    '''
+    ts_list = [i.time for i in midi_obj.time_signature_changes]
+    
+    idx = -1
+    if time >= ts_list[-1]:
+    # It belongs to the last time signature
+        idx = len(ts_list)-1
+    else: 
+    # It belongs to a specific interval
+        for i in range(len(ts_list)):    
+            if time >= ts_list[i] and time < ts_list[i+1]:
+                idx = i
+                break
+            
+    numerator = midi_obj.time_signature_changes[idx].numerator
+    denominator = midi_obj.time_signature_changes[idx].denominator
+    return f"{numerator}{denominator}"
+########################################################################
